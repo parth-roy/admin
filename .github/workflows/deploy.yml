@@ -1,0 +1,29 @@
+name: Deploy Admin Panel to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Droplet via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script_stop: true
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            cd /var/www/admin.gomytruck.com/admin
+            git fetch origin main
+            git reset --hard origin/main
+            npm ci
+            npm run build
+            HOST=127.0.0.1 PORT=4173 NODE_ENV=production pm2 restart parther-admin --update-env || HOST=127.0.0.1 PORT=4173 NODE_ENV=production pm2 start npm --name parther-admin -- run start
+            pm2 save
