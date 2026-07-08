@@ -16,6 +16,8 @@ export default defineConfig({
     // DigitalOcean/nginx/PM2 deployment needs a self-hosted Node listener.
     // The Lovable default is Cloudflare Worker output, which cannot be run by PM2.
     preset: "node-server",
+    // Avoid Nitro beta's nf3/@vercel/nft tracing path on the droplet; bundle deps instead.
+    noExternals: true,
   },
   vite: {
     server: {

@@ -25,5 +25,5 @@ jobs:
             git reset --hard origin/main
             npm ci
             npm run build
-            HOST=127.0.0.1 PORT=4173 NODE_ENV=production pm2 restart parther-admin --update-env || HOST=127.0.0.1 PORT=4173 NODE_ENV=production pm2 start npm --name parther-admin -- run start
+            HOST=127.0.0.1 PORT=4173 NODE_ENV=production pm2 restart admin-panel --update-env || HOST=127.0.0.1 PORT=4173 NODE_ENV=production pm2 start npm --name admin-panel -- run start
             pm2 save
