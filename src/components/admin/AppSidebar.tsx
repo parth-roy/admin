@@ -34,6 +34,7 @@ const sections = [
     items: [
       { title: "Customers", url: "/customers", icon: Users },
       { title: "Drivers", url: "/drivers", icon: Package },
+      { title: "Workforce", url: "/workforce", icon: Users },
       { title: "Fleet Owners", url: "/fleet/owners", icon: Building2 },
       { title: "Fleet Trucks", url: "/fleet/trucks", icon: Truck },
       { title: "Truck Compliance", url: "/fleet/compliance", icon: FileCheck2 },

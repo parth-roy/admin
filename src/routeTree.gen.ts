@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkforceRouteImport } from './routes/workforce'
 import { Route as VerificationRouteImport } from './routes/verification'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -41,6 +42,11 @@ import { Route as ComplianceUlipRouteImport } from './routes/compliance.ulip'
 import { Route as ComplianceExpiryRouteImport } from './routes/compliance.expiry'
 import { Route as BookingsIdRouteImport } from './routes/bookings.$id'
 
+const WorkforceRoute = WorkforceRouteImport.update({
+  id: '/workforce',
+  path: '/workforce',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerificationRoute = VerificationRouteImport.update({
   id: '/verification',
   path: '/verification',
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
+  '/workforce': typeof WorkforceRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
+  '/workforce': typeof WorkforceRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
+  '/workforce': typeof WorkforceRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/support'
     | '/verification'
+    | '/workforce'
     | '/bookings/$id'
     | '/compliance/expiry'
     | '/compliance/ulip'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/support'
     | '/verification'
+    | '/workforce'
     | '/bookings/$id'
     | '/compliance/expiry'
     | '/compliance/ulip'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/support'
     | '/verification'
+    | '/workforce'
     | '/bookings/$id'
     | '/compliance/expiry'
     | '/compliance/ulip'
@@ -414,6 +426,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SupportRoute: typeof SupportRoute
   VerificationRoute: typeof VerificationRoute
+  WorkforceRoute: typeof WorkforceRoute
   FinanceEarningsRoute: typeof FinanceEarningsRoute
   FinanceRefundsRoute: typeof FinanceRefundsRoute
   FinanceRevenueRoute: typeof FinanceRevenueRoute
@@ -433,6 +446,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workforce': {
+      id: '/workforce'
+      path: '/workforce'
+      fullPath: '/workforce'
+      preLoaderRoute: typeof WorkforceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verification': {
       id: '/verification'
       path: '/verification'
@@ -693,6 +713,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SupportRoute: SupportRoute,
   VerificationRoute: VerificationRoute,
+  WorkforceRoute: WorkforceRoute,
   FinanceEarningsRoute: FinanceEarningsRoute,
   FinanceRefundsRoute: FinanceRefundsRoute,
   FinanceRevenueRoute: FinanceRevenueRoute,
