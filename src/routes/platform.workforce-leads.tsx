@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { api } from "@/lib/api";
+import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/platform/workforce-leads")({
@@ -24,14 +24,14 @@ function WorkforceLeadsPage() {
     queryKey: ["workforceLeads", statusFilter],
     queryFn: async () => {
       const qs = statusFilter !== "ALL" ? `?status=${statusFilter}` : "";
-      const res = await api.get(`/admin/leads/workforce${qs}`);
+      const res = await apiClient.get(`/admin/leads/workforce${qs}`);
       return res.data;
     },
   });
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const res = await api.patch(`/admin/leads/workforce/${id}/status`, { status });
+      const res = await apiClient.patch(`/admin/leads/workforce/${id}/status`, { status });
       return res.data;
     },
     onSuccess: () => {

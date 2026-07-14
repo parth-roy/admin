@@ -23,6 +23,7 @@ import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlatformWorkforceLeadsRouteImport } from './routes/platform.workforce-leads'
 import { Route as PlatformWorkforceAnnouncementsRouteImport } from './routes/platform.workforce-announcements'
 import { Route as PlatformTrainingRouteImport } from './routes/platform.training'
 import { Route as PlatformPricingRouteImport } from './routes/platform.pricing'
@@ -110,6 +111,11 @@ const BookingsRoute = BookingsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformWorkforceLeadsRoute = PlatformWorkforceLeadsRouteImport.update({
+  id: '/platform/workforce-leads',
+  path: '/platform/workforce-leads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformWorkforceAnnouncementsRoute =
@@ -237,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
+  '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -271,6 +278,7 @@ export interface FileRoutesByTo {
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
+  '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -306,6 +314,7 @@ export interface FileRoutesById {
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
+  '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -342,6 +351,7 @@ export interface FileRouteTypes {
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
+    | '/platform/workforce-leads'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
+    | '/platform/workforce-leads'
   id:
     | '__root__'
     | '/'
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
+    | '/platform/workforce-leads'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -442,6 +454,7 @@ export interface RootRouteChildren {
   PlatformPricingRoute: typeof PlatformPricingRoute
   PlatformTrainingRoute: typeof PlatformTrainingRoute
   PlatformWorkforceAnnouncementsRoute: typeof PlatformWorkforceAnnouncementsRoute
+  PlatformWorkforceLeadsRoute: typeof PlatformWorkforceLeadsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -542,6 +555,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/workforce-leads': {
+      id: '/platform/workforce-leads'
+      path: '/platform/workforce-leads'
+      fullPath: '/platform/workforce-leads'
+      preLoaderRoute: typeof PlatformWorkforceLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/workforce-announcements': {
@@ -729,6 +749,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformPricingRoute: PlatformPricingRoute,
   PlatformTrainingRoute: PlatformTrainingRoute,
   PlatformWorkforceAnnouncementsRoute: PlatformWorkforceAnnouncementsRoute,
+  PlatformWorkforceLeadsRoute: PlatformWorkforceLeadsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
