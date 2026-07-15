@@ -12,6 +12,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api/client";
 
 const sections = [
   {
@@ -27,6 +29,7 @@ const sections = [
       { title: "All Bookings", url: "/bookings", icon: ClipboardList },
       { title: "Dispatch Queue", url: "/dispatch", icon: Radio },
       { title: "Driver Verification", url: "/verification", icon: ShieldCheck },
+      { title: "Workforce Verification", url: "/workforce/verification", icon: FileCheck2 },
     ],
   },
   {
@@ -87,6 +90,16 @@ export function AppSidebar() {
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname.startsWith(url);
 
+  const { data: pendingData } = useQuery({
+    queryKey: ["pendingWorkerDocumentsCount"],
+    queryFn: async () => {
+      const res = await apiClient.get("/admin/worker-documents/pending-count");
+      return res.data;
+    },
+    refetchInterval: 30000,
+  });
+  const pendingCount = pendingData?.data?.count || 0;
+
   const initials = admin?.name
     ? admin.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : "SA";
@@ -123,7 +136,12 @@ export function AppSidebar() {
                       <Link to={item.url} className="flex items-center gap-2">
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
-                        {isActive(item.url) && (
+                        {item.url === "/workforce/verification" && pendingCount > 0 && (
+                          <div className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white group-data-[collapsible=icon]:hidden">
+                            {pendingCount}
+                          </div>
+                        )}
+                        {isActive(item.url) && item.url !== "/workforce/verification" && (
                           <ChevronRight className="ml-auto h-3.5 w-3.5 opacity-60" />
                         )}
                       </Link>
