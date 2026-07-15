@@ -167,9 +167,9 @@ export interface DriverListItem {
 
 export interface DriverEarning {
   id: string;
-  amount: number;
+  grossAmount: number;
   commission: number;
-  driverNet: number;
+  netAmount: number;
   paidAt: string | null;
   createdAt: string;
   booking: { bookingNumber: string };

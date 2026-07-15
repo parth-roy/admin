@@ -227,7 +227,7 @@ function BookingDetail() {
                   {b.earning && (
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>Driver net</span>
-                      <span className="font-mono">₹{Number(b.earning.driverNet).toLocaleString("en-IN")}</span>
+                      <span className="font-mono">₹{Number(b.earning.netAmount).toLocaleString("en-IN")}</span>
                     </div>
                   )}
                   <Button asChild variant="outline" size="sm" className="w-full mt-2">
@@ -253,7 +253,7 @@ function BookingDetail() {
                 <span className="text-muted-foreground">Status</span>
                 <StatusBadge status={b.paymentStatus as string} />
               </div>
-              {b.pricingAuditLog && b.pricingAuditLog.length > 0 && (
+              {b.pricingAuditLog && b.pricingAuditLog.length > 0 ? (
                 <>
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Base Subtotal</span>
@@ -273,7 +273,19 @@ function BookingDetail() {
                   </div>
                   <Separator className="my-2" />
                 </>
-              )}
+              ) : b.earning ? (
+                <>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Platform Commission</span>
+                    <span className="font-mono text-primary">₹{Number(b.earning.commission ?? 0).toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Driver Net Payout</span>
+                    <span className="font-mono text-success">₹{Number(b.earning.netAmount ?? 0).toLocaleString("en-IN")}</span>
+                  </div>
+                  <Separator className="my-2" />
+                </>
+              ) : null}
               <div className="flex justify-between font-medium">
                 <span>Grand Total (Customer Paid)</span>
                 <span className="font-mono text-base tabular-nums">₹{Number(b.grandTotal ?? b.totalFare ?? 0).toLocaleString("en-IN")}</span>

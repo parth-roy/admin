@@ -17,6 +17,7 @@ export default defineConfig({
     // The Lovable default is Cloudflare Worker output, which cannot be run by PM2.
     preset: "node-server",
     // Avoid Nitro beta's nf3/@vercel/nft tracing path on the droplet; bundle deps instead.
+    // @ts-ignore
     noExternals: true,
   },
   vite: {
