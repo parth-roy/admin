@@ -253,39 +253,42 @@ function BookingDetail() {
                 <span className="text-muted-foreground">Status</span>
                 <StatusBadge status={b.paymentStatus as string} />
               </div>
-              {b.pricingAuditLog && b.pricingAuditLog.length > 0 ? (
-                <>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Base Subtotal</span>
-                    <span className="font-mono">₹{Number(b.pricingAuditLog[0].totalFare ?? b.totalFare ?? 0).toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>GST (Platform remits)</span>
-                    <span className="font-mono">₹{Number(b.gstAmount ?? 0).toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Platform Commission</span>
-                    <span className="font-mono text-primary">₹{Number(b.pricingAuditLog[0].commissionAmount ?? 0).toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Driver Net Payout</span>
-                    <span className="font-mono text-success">₹{Number(b.pricingAuditLog[0].driverPayout ?? 0).toLocaleString("en-IN")}</span>
-                  </div>
-                  <Separator className="my-2" />
-                </>
-              ) : b.earning ? (
-                <>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Platform Commission</span>
-                    <span className="font-mono text-primary">₹{Number(b.earning.commission ?? 0).toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Driver Net Payout</span>
-                    <span className="font-mono text-success">₹{Number(b.earning.netAmount ?? 0).toLocaleString("en-IN")}</span>
-                  </div>
-                  <Separator className="my-2" />
-                </>
-              ) : null}
+              {(() => {
+                const isAudit = b.pricingAuditLog && b.pricingAuditLog.length > 0;
+                const hasEarning = !!b.earning;
+                
+                const base = isAudit ? b.pricingAuditLog[0].totalFare : b.totalFare ?? 0;
+                const gst = b.gstAmount ?? 0;
+                const commission = isAudit ? b.pricingAuditLog[0].commissionAmount : (hasEarning ? b.earning.commission : 0);
+                let driverNet = isAudit ? b.pricingAuditLog[0].driverPayout : (hasEarning ? b.earning.netAmount : null);
+                
+                // Fallback math if driverNet is not explicitly stored
+                if (driverNet === null) {
+                  driverNet = Math.max(0, base - commission);
+                }
+                
+                return (
+                  <>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Base Subtotal</span>
+                      <span className="font-mono">₹{Number(base).toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>GST (Platform remits)</span>
+                      <span className="font-mono">₹{Number(gst).toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Platform Commission</span>
+                      <span className="font-mono text-primary">₹{Number(commission).toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Driver Net Payout</span>
+                      <span className="font-mono text-success">₹{Number(driverNet).toLocaleString("en-IN")}</span>
+                    </div>
+                    <Separator className="my-2" />
+                  </>
+                );
+              })()}
               <div className="flex justify-between font-medium">
                 <span>Grand Total (Customer Paid)</span>
                 <span className="font-mono text-base tabular-nums">₹{Number(b.grandTotal ?? b.totalFare ?? 0).toLocaleString("en-IN")}</span>
