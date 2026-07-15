@@ -265,7 +265,7 @@ function BookingDetail() {
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Platform Commission</span>
-                    <span className="font-mono text-primary">₹{Number(b.pricingAuditLog[0].platformRevenue ?? 0).toLocaleString("en-IN")}</span>
+                    <span className="font-mono text-primary">₹{Number(b.pricingAuditLog[0].commissionAmount ?? 0).toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Driver Net Payout</span>
