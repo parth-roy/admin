@@ -68,6 +68,7 @@ const sections = [
       { title: "Gamification", url: "/platform/gamification", icon: ShieldCheck },
       { title: "Training", url: "/platform/training", icon: GraduationCap },
       { title: "Workforce Leads", url: "/platform/workforce-leads", icon: ClipboardList },
+      { title: "Gig Jobs", url: "/platform/gigs", icon: ClipboardList },
     ],
   },
   {
