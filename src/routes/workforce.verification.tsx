@@ -66,8 +66,8 @@ function WorkforceVerificationPage() {
               <Card key={worker.id} className="p-6">
                 <div className="flex justify-between items-start mb-6">
                   <div>
-                    <h3 className="text-xl font-bold">{worker.user.name}</h3>
-                    <p className="text-muted-foreground">{worker.user.phone}</p>
+                    <h3 className="text-xl font-bold">{worker.user?.name || "Unknown"}</h3>
+                    <p className="text-muted-foreground">{worker.user?.phone || "No phone"}</p>
                   </div>
                   <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
                     Pending Verification
@@ -75,7 +75,7 @@ function WorkforceVerificationPage() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-                  {worker.documents.map((doc: any) => (
+                  {(worker.documents || []).map((doc: any) => (
                     <div key={doc.id} className="flex flex-col gap-2">
                       <span className="text-xs font-semibold uppercase text-muted-foreground">{doc.type}</span>
                       <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="block relative group rounded-md overflow-hidden border">
