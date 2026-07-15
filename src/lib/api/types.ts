@@ -99,6 +99,8 @@ export interface BookingDetail extends BookingListItem {
   cancelledBy: string | null;
   earning: DriverEarning | null;
   pricingAuditLog?: any[];
+  grandTotal?: number;
+  gstAmount?: number;
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────

@@ -253,10 +253,30 @@ function BookingDetail() {
                 <span className="text-muted-foreground">Status</span>
                 <StatusBadge status={b.paymentStatus as string} />
               </div>
-              <Separator />
+              {b.pricingAuditLog && b.pricingAuditLog.length > 0 && (
+                <>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Base Subtotal</span>
+                    <span className="font-mono">₹{Number(b.pricingAuditLog[0].totalFare ?? b.totalFare ?? 0).toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>GST (Platform remits)</span>
+                    <span className="font-mono">₹{Number(b.gstAmount ?? 0).toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Platform Commission</span>
+                    <span className="font-mono text-primary">₹{Number(b.pricingAuditLog[0].platformRevenue ?? 0).toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Driver Net Payout</span>
+                    <span className="font-mono text-success">₹{Number(b.pricingAuditLog[0].driverPayout ?? 0).toLocaleString("en-IN")}</span>
+                  </div>
+                  <Separator className="my-2" />
+                </>
+              )}
               <div className="flex justify-between font-medium">
-                <span>Total fare</span>
-                <span className="font-mono text-base tabular-nums">₹{Number(b.totalFare ?? 0).toLocaleString("en-IN")}</span>
+                <span>Grand Total (Customer Paid)</span>
+                <span className="font-mono text-base tabular-nums">₹{Number(b.grandTotal ?? b.totalFare ?? 0).toLocaleString("en-IN")}</span>
               </div>
               <Button
                 variant="outline" size="sm" className="w-full"
