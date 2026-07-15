@@ -98,6 +98,7 @@ export interface BookingDetail extends BookingListItem {
   cancellationReason: string | null;
   cancelledBy: string | null;
   earning: DriverEarning | null;
+  pricingAuditLog?: any[];
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────
