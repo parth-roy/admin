@@ -23,11 +23,13 @@ import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookingsIndexRouteImport } from './routes/bookings.index'
+import { Route as WorkforceVerificationRouteImport } from './routes/workforce.verification'
 import { Route as PlatformWorkforceLeadsRouteImport } from './routes/platform.workforce-leads'
 import { Route as PlatformWorkforceAnnouncementsRouteImport } from './routes/platform.workforce-announcements'
 import { Route as PlatformTrainingRouteImport } from './routes/platform.training'
 import { Route as PlatformPricingRouteImport } from './routes/platform.pricing'
 import { Route as PlatformNotificationsRouteImport } from './routes/platform.notifications'
+import { Route as PlatformGigsRouteImport } from './routes/platform.gigs'
 import { Route as PlatformGamificationRouteImport } from './routes/platform.gamification'
 import { Route as PlatformAnnouncementsRouteImport } from './routes/platform.announcements'
 import { Route as FleetTrucksRouteImport } from './routes/fleet.trucks'
@@ -113,6 +115,11 @@ const BookingsIndexRoute = BookingsIndexRouteImport.update({
   path: '/bookings/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkforceVerificationRoute = WorkforceVerificationRouteImport.update({
+  id: '/verification',
+  path: '/verification',
+  getParentRoute: () => WorkforceRoute,
+} as any)
 const PlatformWorkforceLeadsRoute = PlatformWorkforceLeadsRouteImport.update({
   id: '/platform/workforce-leads',
   path: '/platform/workforce-leads',
@@ -137,6 +144,11 @@ const PlatformPricingRoute = PlatformPricingRouteImport.update({
 const PlatformNotificationsRoute = PlatformNotificationsRouteImport.update({
   id: '/platform/notifications',
   path: '/platform/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformGigsRoute = PlatformGigsRouteImport.update({
+  id: '/platform/gigs',
+  path: '/platform/gigs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformGamificationRoute = PlatformGamificationRouteImport.update({
@@ -223,7 +235,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
-  '/workforce': typeof WorkforceRoute
+  '/workforce': typeof WorkforceRouteWithChildren
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -238,11 +250,13 @@ export interface FileRoutesByFullPath {
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
+  '/platform/gigs': typeof PlatformGigsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
+  '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -258,7 +272,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
-  '/workforce': typeof WorkforceRoute
+  '/workforce': typeof WorkforceRouteWithChildren
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -273,11 +287,13 @@ export interface FileRoutesByTo {
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
+  '/platform/gigs': typeof PlatformGigsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
+  '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings': typeof BookingsIndexRoute
 }
 export interface FileRoutesById {
@@ -294,7 +310,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
-  '/workforce': typeof WorkforceRoute
+  '/workforce': typeof WorkforceRouteWithChildren
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -309,11 +325,13 @@ export interface FileRoutesById {
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
+  '/platform/gigs': typeof PlatformGigsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
+  '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -346,11 +364,13 @@ export interface FileRouteTypes {
     | '/fleet/trucks'
     | '/platform/announcements'
     | '/platform/gamification'
+    | '/platform/gigs'
     | '/platform/notifications'
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
     | '/platform/workforce-leads'
+    | '/workforce/verification'
     | '/bookings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -381,11 +401,13 @@ export interface FileRouteTypes {
     | '/fleet/trucks'
     | '/platform/announcements'
     | '/platform/gamification'
+    | '/platform/gigs'
     | '/platform/notifications'
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
     | '/platform/workforce-leads'
+    | '/workforce/verification'
     | '/bookings'
   id:
     | '__root__'
@@ -416,11 +438,13 @@ export interface FileRouteTypes {
     | '/fleet/trucks'
     | '/platform/announcements'
     | '/platform/gamification'
+    | '/platform/gigs'
     | '/platform/notifications'
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
     | '/platform/workforce-leads'
+    | '/workforce/verification'
     | '/bookings/'
   fileRoutesById: FileRoutesById
 }
@@ -437,7 +461,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SupportRoute: typeof SupportRoute
   VerificationRoute: typeof VerificationRoute
-  WorkforceRoute: typeof WorkforceRoute
+  WorkforceRoute: typeof WorkforceRouteWithChildren
   BookingsIdRoute: typeof BookingsIdRoute
   FinanceEarningsRoute: typeof FinanceEarningsRoute
   FinanceRefundsRoute: typeof FinanceRefundsRoute
@@ -450,6 +474,7 @@ export interface RootRouteChildren {
   FleetTrucksRoute: typeof FleetTrucksRoute
   PlatformAnnouncementsRoute: typeof PlatformAnnouncementsRoute
   PlatformGamificationRoute: typeof PlatformGamificationRoute
+  PlatformGigsRoute: typeof PlatformGigsRoute
   PlatformNotificationsRoute: typeof PlatformNotificationsRoute
   PlatformPricingRoute: typeof PlatformPricingRoute
   PlatformTrainingRoute: typeof PlatformTrainingRoute
@@ -558,6 +583,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workforce/verification': {
+      id: '/workforce/verification'
+      path: '/verification'
+      fullPath: '/workforce/verification'
+      preLoaderRoute: typeof WorkforceVerificationRouteImport
+      parentRoute: typeof WorkforceRoute
+    }
     '/platform/workforce-leads': {
       id: '/platform/workforce-leads'
       path: '/platform/workforce-leads'
@@ -591,6 +623,13 @@ declare module '@tanstack/react-router' {
       path: '/platform/notifications'
       fullPath: '/platform/notifications'
       preLoaderRoute: typeof PlatformNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/gigs': {
+      id: '/platform/gigs'
+      path: '/platform/gigs'
+      fullPath: '/platform/gigs'
+      preLoaderRoute: typeof PlatformGigsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/gamification': {
@@ -708,6 +747,18 @@ const ComplianceRouteWithChildren = ComplianceRoute._addFileChildren(
   ComplianceRouteChildren,
 )
 
+interface WorkforceRouteChildren {
+  WorkforceVerificationRoute: typeof WorkforceVerificationRoute
+}
+
+const WorkforceRouteChildren: WorkforceRouteChildren = {
+  WorkforceVerificationRoute: WorkforceVerificationRoute,
+}
+
+const WorkforceRouteWithChildren = WorkforceRoute._addFileChildren(
+  WorkforceRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComplianceRoute: ComplianceRouteWithChildren,
@@ -721,7 +772,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SupportRoute: SupportRoute,
   VerificationRoute: VerificationRoute,
-  WorkforceRoute: WorkforceRoute,
+  WorkforceRoute: WorkforceRouteWithChildren,
   BookingsIdRoute: BookingsIdRoute,
   FinanceEarningsRoute: FinanceEarningsRoute,
   FinanceRefundsRoute: FinanceRefundsRoute,
@@ -734,6 +785,7 @@ const rootRouteChildren: RootRouteChildren = {
   FleetTrucksRoute: FleetTrucksRoute,
   PlatformAnnouncementsRoute: PlatformAnnouncementsRoute,
   PlatformGamificationRoute: PlatformGamificationRoute,
+  PlatformGigsRoute: PlatformGigsRoute,
   PlatformNotificationsRoute: PlatformNotificationsRoute,
   PlatformPricingRoute: PlatformPricingRoute,
   PlatformTrainingRoute: PlatformTrainingRoute,
@@ -744,3 +796,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

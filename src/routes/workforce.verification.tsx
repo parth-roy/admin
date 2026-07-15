@@ -43,7 +43,7 @@ function WorkforceVerificationPage() {
     },
   });
 
-  const workers = data?.data || [];
+  const workers = Array.isArray(data?.data) ? data.data : [];
 
   return (
     <div className="flex-1 overflow-auto bg-slate-50">
