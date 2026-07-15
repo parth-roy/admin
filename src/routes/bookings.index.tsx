@@ -19,7 +19,7 @@ import { bookingsApi } from "@/lib/api/bookings.api";
 import type { BookingStatus, VehicleType, PaymentStatus, BookingListItem } from "@/lib/api/types";
 import { useDebounce } from "@/hooks/useDebounce";
 
-export const Route = createFileRoute("/bookings")({
+export const Route = createFileRoute("/bookings/")({
   head: () => ({ meta: [{ title: "Bookings — Parther Admin" }] }),
   component: BookingsPage,
 });

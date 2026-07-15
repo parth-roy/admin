@@ -21,8 +21,8 @@ import { Route as DriversRouteImport } from './routes/drivers'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
-import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BookingsIndexRouteImport } from './routes/bookings.index'
 import { Route as PlatformWorkforceLeadsRouteImport } from './routes/platform.workforce-leads'
 import { Route as PlatformWorkforceAnnouncementsRouteImport } from './routes/platform.workforce-announcements'
 import { Route as PlatformTrainingRouteImport } from './routes/platform.training'
@@ -103,14 +103,14 @@ const ComplianceRoute = ComplianceRouteImport.update({
   path: '/compliance',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BookingsRoute = BookingsRouteImport.update({
-  id: '/bookings',
-  path: '/bookings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingsIndexRoute = BookingsIndexRouteImport.update({
+  id: '/bookings/',
+  path: '/bookings/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformWorkforceLeadsRoute = PlatformWorkforceLeadsRouteImport.update({
@@ -205,14 +205,13 @@ const ComplianceExpiryRoute = ComplianceExpiryRouteImport.update({
   getParentRoute: () => ComplianceRoute,
 } as any)
 const BookingsIdRoute = BookingsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => BookingsRoute,
+  id: '/bookings/$id',
+  path: '/bookings/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/bookings': typeof BookingsRouteWithChildren
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
@@ -244,10 +243,10 @@ export interface FileRoutesByFullPath {
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
+  '/bookings/': typeof BookingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/bookings': typeof BookingsRouteWithChildren
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
@@ -279,11 +278,11 @@ export interface FileRoutesByTo {
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
+  '/bookings': typeof BookingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/bookings': typeof BookingsRouteWithChildren
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
@@ -315,12 +314,12 @@ export interface FileRoutesById {
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
+  '/bookings/': typeof BookingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/bookings'
     | '/compliance'
     | '/customers'
     | '/dispatch'
@@ -352,10 +351,10 @@ export interface FileRouteTypes {
     | '/platform/training'
     | '/platform/workforce-announcements'
     | '/platform/workforce-leads'
+    | '/bookings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/bookings'
     | '/compliance'
     | '/customers'
     | '/dispatch'
@@ -387,10 +386,10 @@ export interface FileRouteTypes {
     | '/platform/training'
     | '/platform/workforce-announcements'
     | '/platform/workforce-leads'
+    | '/bookings'
   id:
     | '__root__'
     | '/'
-    | '/bookings'
     | '/compliance'
     | '/customers'
     | '/dispatch'
@@ -422,11 +421,11 @@ export interface FileRouteTypes {
     | '/platform/training'
     | '/platform/workforce-announcements'
     | '/platform/workforce-leads'
+    | '/bookings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  BookingsRoute: typeof BookingsRouteWithChildren
   ComplianceRoute: typeof ComplianceRouteWithChildren
   CustomersRoute: typeof CustomersRoute
   DispatchRoute: typeof DispatchRoute
@@ -439,6 +438,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   VerificationRoute: typeof VerificationRoute
   WorkforceRoute: typeof WorkforceRoute
+  BookingsIdRoute: typeof BookingsIdRoute
   FinanceEarningsRoute: typeof FinanceEarningsRoute
   FinanceRefundsRoute: typeof FinanceRefundsRoute
   FinanceRevenueRoute: typeof FinanceRevenueRoute
@@ -455,6 +455,7 @@ export interface RootRouteChildren {
   PlatformTrainingRoute: typeof PlatformTrainingRoute
   PlatformWorkforceAnnouncementsRoute: typeof PlatformWorkforceAnnouncementsRoute
   PlatformWorkforceLeadsRoute: typeof PlatformWorkforceLeadsRoute
+  BookingsIndexRoute: typeof BookingsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -543,18 +544,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComplianceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/bookings': {
-      id: '/bookings'
-      path: '/bookings'
-      fullPath: '/bookings'
-      preLoaderRoute: typeof BookingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookings/': {
+      id: '/bookings/'
+      path: '/bookings'
+      fullPath: '/bookings/'
+      preLoaderRoute: typeof BookingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/workforce-leads': {
@@ -685,25 +686,13 @@ declare module '@tanstack/react-router' {
     }
     '/bookings/$id': {
       id: '/bookings/$id'
-      path: '/$id'
+      path: '/bookings/$id'
       fullPath: '/bookings/$id'
       preLoaderRoute: typeof BookingsIdRouteImport
-      parentRoute: typeof BookingsRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface BookingsRouteChildren {
-  BookingsIdRoute: typeof BookingsIdRoute
-}
-
-const BookingsRouteChildren: BookingsRouteChildren = {
-  BookingsIdRoute: BookingsIdRoute,
-}
-
-const BookingsRouteWithChildren = BookingsRoute._addFileChildren(
-  BookingsRouteChildren,
-)
 
 interface ComplianceRouteChildren {
   ComplianceExpiryRoute: typeof ComplianceExpiryRoute
@@ -721,7 +710,6 @@ const ComplianceRouteWithChildren = ComplianceRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  BookingsRoute: BookingsRouteWithChildren,
   ComplianceRoute: ComplianceRouteWithChildren,
   CustomersRoute: CustomersRoute,
   DispatchRoute: DispatchRoute,
@@ -734,6 +722,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   VerificationRoute: VerificationRoute,
   WorkforceRoute: WorkforceRoute,
+  BookingsIdRoute: BookingsIdRoute,
   FinanceEarningsRoute: FinanceEarningsRoute,
   FinanceRefundsRoute: FinanceRefundsRoute,
   FinanceRevenueRoute: FinanceRevenueRoute,
@@ -750,17 +739,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformTrainingRoute: PlatformTrainingRoute,
   PlatformWorkforceAnnouncementsRoute: PlatformWorkforceAnnouncementsRoute,
   PlatformWorkforceLeadsRoute: PlatformWorkforceLeadsRoute,
+  BookingsIndexRoute: BookingsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
