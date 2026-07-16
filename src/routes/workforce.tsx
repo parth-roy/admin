@@ -17,9 +17,10 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { useWorkforce, useUpdateWorkerBank } from "@/hooks/useWorkforce";
+import { useWorkforce, useUpdateWorkerBank, useCreditWorkerWallet } from "@/hooks/useWorkforce";
 import { useDebounce } from "@/hooks/useDebounce";
 import { toast } from "sonner";
+import { Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/workforce")({
   component: WorkforceList,
@@ -32,6 +33,7 @@ function WorkforceList() {
   const [status, setStatus] = useState<string>("all");
   
   const [editingWorker, setEditingWorker] = useState<any>(null);
+  const [creditingWorker, setCreditingWorker] = useState<any>(null);
 
   const { data, isLoading } = useWorkforce({
     page,
@@ -130,14 +132,24 @@ function WorkforceList() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 gap-1"
-                        onClick={() => setEditingWorker(worker)}
-                      >
-                        <Edit className="h-4 w-4" /> Bank Details
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 gap-1"
+                          onClick={() => setEditingWorker(worker)}
+                        >
+                          <Edit className="h-4 w-4" /> Bank Details
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 gap-1 text-green-600 border-green-200 hover:bg-green-50"
+                          onClick={() => setCreditingWorker(worker)}
+                        >
+                          <Wallet className="h-4 w-4" /> Credit Wallet
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -178,7 +190,86 @@ function WorkforceList() {
           onOpenChange={(open) => !open && setEditingWorker(null)}
         />
       )}
+
+      {creditingWorker && (
+        <CreditWalletDialog
+          worker={creditingWorker}
+          open={!!creditingWorker}
+          onOpenChange={(open) => !open && setCreditingWorker(null)}
+        />
+      )}
     </div>
+  );
+}
+
+function CreditWalletDialog({ worker, open, onOpenChange }: { worker: any, open: boolean, onOpenChange: (open: boolean) => void }) {
+  const [amount, setAmount] = useState<string>("");
+  const [note, setNote] = useState<string>("");
+  
+  const creditWallet = useCreditWorkerWallet();
+
+  const handleSave = () => {
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    creditWallet.mutate(
+      {
+        workerId: worker.id,
+        amount: numAmount,
+        note,
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Successfully credited ?${numAmount} to ${worker?.user?.name}'s wallet`);
+          onOpenChange(false);
+        },
+        onError: (err: any) => {
+          toast.error(err.response?.data?.message || err.message);
+        }
+      }
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Credit Wallet - {worker?.user?.name}</DialogTitle>
+          <DialogDescription>
+            Manually add funds to this worker's wallet.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">Amount (?)</label>
+            <Input 
+              type="number"
+              placeholder="e.g. 500" 
+              value={amount} 
+              onChange={(e) => setAmount(e.target.value)} 
+            />
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">Note (Optional)</label>
+            <Input 
+              placeholder="e.g. Manual payment received"
+              value={note} 
+              onChange={(e) => setNote(e.target.value)} 
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSave} disabled={creditWallet.isPending}>
+            {creditWallet.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Credit Wallet
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

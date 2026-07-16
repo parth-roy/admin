@@ -35,3 +35,17 @@ export function useUpdateWorkerBank() {
     },
   });
 }
+
+export function useCreditWorkerWallet() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workerId, amount, note }: { workerId: string; amount: number; note?: string }) => {
+      const res = await api.post(`/admin/workforce/${workerId}/wallet-credit`, { amount, note });
+      return res.data;
+    },
+    onSuccess: (_, { workerId }) => {
+      queryClient.invalidateQueries({ queryKey: ["worker", workerId] });
+      queryClient.invalidateQueries({ queryKey: ["workforce"] });
+    },
+  });
+}
