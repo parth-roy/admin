@@ -6,7 +6,7 @@ export function useWorkforce(params: { page: number; limit: number; search?: str
     queryKey: ["workforce", params],
     queryFn: async () => {
       const res = await api.get("/admin/workforce", { params });
-      return res.data;
+      return res.data.data;
     },
   });
 }
@@ -16,7 +16,7 @@ export function useWorker(id: string) {
     queryKey: ["worker", id],
     queryFn: async () => {
       const res = await api.get(`/admin/workforce/${id}`);
-      return res.data;
+      return res.data.data;
     },
     enabled: !!id,
   });
