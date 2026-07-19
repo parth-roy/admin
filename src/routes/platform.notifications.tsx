@@ -13,6 +13,10 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useBroadcastNotification } from "@/hooks/usePlatform";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import apiClient from "@/lib/api/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/platform/notifications")({
   head: () => ({ meta: [{ title: "Broadcast Notifications — Parther Admin" }] }),
@@ -55,12 +59,31 @@ function NotificationsPage() {
   };
 
   return (
-    <div>
+    <div className="flex flex-col h-full">
       <PageHeader
-        title="Broadcast Notifications"
-        description="Send push notifications to user segments."
+        title="Notifications & Messages"
+        description="Send push broadcasts and view public contact messages."
       />
-      <div className="p-6 grid gap-4 lg:grid-cols-[1fr_360px]">
+      
+      <div className="px-6 pt-4 pb-0 border-b">
+        <Tabs defaultValue="broadcast" className="w-full">
+          <TabsList className="mb-[-1px] bg-transparent p-0 border-b-0 space-x-6">
+            <TabsTrigger 
+              value="broadcast" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-3 pt-2 px-1"
+            >
+              Push Broadcasts
+            </TabsTrigger>
+            <TabsTrigger 
+              value="contact" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-3 pt-2 px-1"
+            >
+              Public Form Messages
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="broadcast" className="mt-0 py-6">
+            <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
         {/* Compose */}
         <Card>
           <CardHeader><CardTitle className="text-base">Compose broadcast</CardTitle></CardHeader>
@@ -134,7 +157,87 @@ function NotificationsPage() {
             </Card>
           )}
         </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contact" className="mt-0 py-6">
+            <ContactMessagesTab />
+          </TabsContent>
+        </Tabs>
       </div>
+    </div>
+  );
+}
+
+function ContactMessagesTab() {
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-contact-messages"],
+    queryFn: async () => {
+      const res = await apiClient.get("/admin/contact-messages");
+      return res.data?.data || [];
+    }
+  });
+
+  const updateStatusMut = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      await apiClient.patch(`/admin/contact-messages/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-contact-messages"] });
+      toast.success("Message status updated");
+    },
+    onError: () => toast.error("Failed to update status")
+  });
+
+  if (isLoading) {
+    return <div className="flex justify-center p-8"><Loader2 className="animate-spin text-muted-foreground h-6 w-6" /></div>;
+  }
+
+  if (!data?.length) {
+    return <div className="p-8 text-center text-muted-foreground">No contact messages yet.</div>;
+  }
+
+  return (
+    <div className="grid gap-4">
+      {data.map((msg: any) => (
+        <Card key={msg.id} className={msg.status === "UNREAD" ? "border-l-4 border-l-blue-500" : ""}>
+          <CardHeader className="py-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-base">{msg.name}</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">{msg.phone} · {formatDistanceToNow(new Date(msg.createdAt))} ago</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={msg.status === "UNREAD" ? "default" : msg.status === "RESOLVED" ? "secondary" : "outline"}>
+                  {msg.status}
+                </Badge>
+                {msg.status !== "RESOLVED" && (
+                  <Select
+                    value={msg.status}
+                    onValueChange={(val) => updateStatusMut.mutate({ id: msg.id, status: val })}
+                  >
+                    <SelectTrigger className="h-7 text-xs w-[120px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UNREAD">Mark Unread</SelectItem>
+                      <SelectItem value="READ">Mark Read</SelectItem>
+                      <SelectItem value="RESOLVED">Mark Resolved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pb-4">
+            <div className="p-3 bg-muted/30 rounded-md text-sm whitespace-pre-wrap">
+              {msg.message}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
