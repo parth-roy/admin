@@ -10,7 +10,7 @@ import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
 import { useState } from "react";
 
-export const Route = createFileRoute("/workforce/verification")({
+export const Route = createFileRoute("/workforce_/verification")({
   component: WorkforceVerificationPage,
 });
 

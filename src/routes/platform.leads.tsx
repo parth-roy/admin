@@ -11,31 +11,31 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/platform/workforce-leads")({
-  component: WorkforceLeadsPage,
+export const Route = createFileRoute("/platform/leads")({
+  component: LeadsPage,
 });
 
-function WorkforceLeadsPage() {
+function LeadsPage() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["workforceLeads", statusFilter],
+    queryKey: ["leads", statusFilter],
     queryFn: async () => {
       const qs = statusFilter !== "ALL" ? `?status=${statusFilter}` : "";
-      const res = await apiClient.get(`/admin/leads/workforce${qs}`);
+      const res = await apiClient.get(`/admin/leads${qs}`);
       return res.data;
     },
   });
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const res = await apiClient.patch(`/admin/leads/workforce/${id}/status`, { status });
+      const res = await apiClient.patch(`/admin/leads/${id}/status`, { status });
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workforceLeads"] });
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
       toast.success("Lead status updated");
     },
     onError: (err: any) => {
@@ -59,6 +59,8 @@ function WorkforceLeadsPage() {
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "CONVERTED":
         return "bg-green-100 text-green-800 border-green-200";
+      case "SUITABLE":
+        return "bg-emerald-100 text-emerald-800 border-emerald-200 font-bold";
       case "REJECTED":
         return "bg-red-100 text-red-800 border-red-200";
       default:
@@ -69,8 +71,8 @@ function WorkforceLeadsPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <PageHeader 
-        title="Workforce Leads" 
-        description="Manage registration applications from the GoMyTruck website."
+        title="All Leads" 
+        description="Manage registration applications (Driver, Fleet, Workforce, Estimates) from the website."
       />
 
       <Card className="p-4 border-slate-200 shadow-sm">
@@ -94,6 +96,7 @@ function WorkforceLeadsPage() {
               <SelectItem value="PENDING">Pending</SelectItem>
               <SelectItem value="CONTACTED">Contacted</SelectItem>
               <SelectItem value="CONVERTED">Converted</SelectItem>
+              <SelectItem value="SUITABLE">Suitable (Approved)</SelectItem>
               <SelectItem value="REJECTED">Rejected</SelectItem>
             </SelectContent>
           </Select>

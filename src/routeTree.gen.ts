@@ -23,12 +23,12 @@ import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookingsIndexRouteImport } from './routes/bookings.index'
-import { Route as WorkforceVerificationRouteImport } from './routes/workforce.verification'
-import { Route as PlatformWorkforceLeadsRouteImport } from './routes/platform.workforce-leads'
+import { Route as WorkforceVerificationRouteImport } from './routes/workforce_.verification'
 import { Route as PlatformWorkforceAnnouncementsRouteImport } from './routes/platform.workforce-announcements'
 import { Route as PlatformTrainingRouteImport } from './routes/platform.training'
 import { Route as PlatformPricingRouteImport } from './routes/platform.pricing'
 import { Route as PlatformNotificationsRouteImport } from './routes/platform.notifications'
+import { Route as PlatformLeadsRouteImport } from './routes/platform.leads'
 import { Route as PlatformGigsRouteImport } from './routes/platform.gigs'
 import { Route as PlatformGamificationRouteImport } from './routes/platform.gamification'
 import { Route as PlatformAnnouncementsRouteImport } from './routes/platform.announcements'
@@ -116,13 +116,8 @@ const BookingsIndexRoute = BookingsIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkforceVerificationRoute = WorkforceVerificationRouteImport.update({
-  id: '/verification',
-  path: '/verification',
-  getParentRoute: () => WorkforceRoute,
-} as any)
-const PlatformWorkforceLeadsRoute = PlatformWorkforceLeadsRouteImport.update({
-  id: '/platform/workforce-leads',
-  path: '/platform/workforce-leads',
+  id: '/workforce_/verification',
+  path: '/workforce/verification',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformWorkforceAnnouncementsRoute =
@@ -144,6 +139,11 @@ const PlatformPricingRoute = PlatformPricingRouteImport.update({
 const PlatformNotificationsRoute = PlatformNotificationsRouteImport.update({
   id: '/platform/notifications',
   path: '/platform/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformLeadsRoute = PlatformLeadsRouteImport.update({
+  id: '/platform/leads',
+  path: '/platform/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformGigsRoute = PlatformGigsRouteImport.update({
@@ -235,7 +235,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
-  '/workforce': typeof WorkforceRouteWithChildren
+  '/workforce': typeof WorkforceRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -251,11 +251,11 @@ export interface FileRoutesByFullPath {
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
   '/platform/gigs': typeof PlatformGigsRoute
+  '/platform/leads': typeof PlatformLeadsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
-  '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
 }
@@ -272,7 +272,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
-  '/workforce': typeof WorkforceRouteWithChildren
+  '/workforce': typeof WorkforceRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -288,11 +288,11 @@ export interface FileRoutesByTo {
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
   '/platform/gigs': typeof PlatformGigsRoute
+  '/platform/leads': typeof PlatformLeadsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
-  '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings': typeof BookingsIndexRoute
 }
@@ -310,7 +310,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
-  '/workforce': typeof WorkforceRouteWithChildren
+  '/workforce': typeof WorkforceRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -326,12 +326,12 @@ export interface FileRoutesById {
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
   '/platform/gigs': typeof PlatformGigsRoute
+  '/platform/leads': typeof PlatformLeadsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
-  '/platform/workforce-leads': typeof PlatformWorkforceLeadsRoute
-  '/workforce/verification': typeof WorkforceVerificationRoute
+  '/workforce_/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -365,11 +365,11 @@ export interface FileRouteTypes {
     | '/platform/announcements'
     | '/platform/gamification'
     | '/platform/gigs'
+    | '/platform/leads'
     | '/platform/notifications'
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
-    | '/platform/workforce-leads'
     | '/workforce/verification'
     | '/bookings/'
   fileRoutesByTo: FileRoutesByTo
@@ -402,11 +402,11 @@ export interface FileRouteTypes {
     | '/platform/announcements'
     | '/platform/gamification'
     | '/platform/gigs'
+    | '/platform/leads'
     | '/platform/notifications'
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
-    | '/platform/workforce-leads'
     | '/workforce/verification'
     | '/bookings'
   id:
@@ -439,12 +439,12 @@ export interface FileRouteTypes {
     | '/platform/announcements'
     | '/platform/gamification'
     | '/platform/gigs'
+    | '/platform/leads'
     | '/platform/notifications'
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
-    | '/platform/workforce-leads'
-    | '/workforce/verification'
+    | '/workforce_/verification'
     | '/bookings/'
   fileRoutesById: FileRoutesById
 }
@@ -461,7 +461,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SupportRoute: typeof SupportRoute
   VerificationRoute: typeof VerificationRoute
-  WorkforceRoute: typeof WorkforceRouteWithChildren
+  WorkforceRoute: typeof WorkforceRoute
   BookingsIdRoute: typeof BookingsIdRoute
   FinanceEarningsRoute: typeof FinanceEarningsRoute
   FinanceRefundsRoute: typeof FinanceRefundsRoute
@@ -475,11 +475,12 @@ export interface RootRouteChildren {
   PlatformAnnouncementsRoute: typeof PlatformAnnouncementsRoute
   PlatformGamificationRoute: typeof PlatformGamificationRoute
   PlatformGigsRoute: typeof PlatformGigsRoute
+  PlatformLeadsRoute: typeof PlatformLeadsRoute
   PlatformNotificationsRoute: typeof PlatformNotificationsRoute
   PlatformPricingRoute: typeof PlatformPricingRoute
   PlatformTrainingRoute: typeof PlatformTrainingRoute
   PlatformWorkforceAnnouncementsRoute: typeof PlatformWorkforceAnnouncementsRoute
-  PlatformWorkforceLeadsRoute: typeof PlatformWorkforceLeadsRoute
+  WorkforceVerificationRoute: typeof WorkforceVerificationRoute
   BookingsIndexRoute: typeof BookingsIndexRoute
 }
 
@@ -583,18 +584,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/workforce/verification': {
-      id: '/workforce/verification'
-      path: '/verification'
+    '/workforce_/verification': {
+      id: '/workforce_/verification'
+      path: '/workforce/verification'
       fullPath: '/workforce/verification'
       preLoaderRoute: typeof WorkforceVerificationRouteImport
-      parentRoute: typeof WorkforceRoute
-    }
-    '/platform/workforce-leads': {
-      id: '/platform/workforce-leads'
-      path: '/platform/workforce-leads'
-      fullPath: '/platform/workforce-leads'
-      preLoaderRoute: typeof PlatformWorkforceLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/workforce-announcements': {
@@ -623,6 +617,13 @@ declare module '@tanstack/react-router' {
       path: '/platform/notifications'
       fullPath: '/platform/notifications'
       preLoaderRoute: typeof PlatformNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/leads': {
+      id: '/platform/leads'
+      path: '/platform/leads'
+      fullPath: '/platform/leads'
+      preLoaderRoute: typeof PlatformLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/gigs': {
@@ -747,18 +748,6 @@ const ComplianceRouteWithChildren = ComplianceRoute._addFileChildren(
   ComplianceRouteChildren,
 )
 
-interface WorkforceRouteChildren {
-  WorkforceVerificationRoute: typeof WorkforceVerificationRoute
-}
-
-const WorkforceRouteChildren: WorkforceRouteChildren = {
-  WorkforceVerificationRoute: WorkforceVerificationRoute,
-}
-
-const WorkforceRouteWithChildren = WorkforceRoute._addFileChildren(
-  WorkforceRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComplianceRoute: ComplianceRouteWithChildren,
@@ -772,7 +761,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SupportRoute: SupportRoute,
   VerificationRoute: VerificationRoute,
-  WorkforceRoute: WorkforceRouteWithChildren,
+  WorkforceRoute: WorkforceRoute,
   BookingsIdRoute: BookingsIdRoute,
   FinanceEarningsRoute: FinanceEarningsRoute,
   FinanceRefundsRoute: FinanceRefundsRoute,
@@ -786,11 +775,12 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformAnnouncementsRoute: PlatformAnnouncementsRoute,
   PlatformGamificationRoute: PlatformGamificationRoute,
   PlatformGigsRoute: PlatformGigsRoute,
+  PlatformLeadsRoute: PlatformLeadsRoute,
   PlatformNotificationsRoute: PlatformNotificationsRoute,
   PlatformPricingRoute: PlatformPricingRoute,
   PlatformTrainingRoute: PlatformTrainingRoute,
   PlatformWorkforceAnnouncementsRoute: PlatformWorkforceAnnouncementsRoute,
-  PlatformWorkforceLeadsRoute: PlatformWorkforceLeadsRoute,
+  WorkforceVerificationRoute: WorkforceVerificationRoute,
   BookingsIndexRoute: BookingsIndexRoute,
 }
 export const routeTree = rootRouteImport
