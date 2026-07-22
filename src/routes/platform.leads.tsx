@@ -141,6 +141,12 @@ function LeadsPage() {
                     <TableCell>
                       <div className="font-semibold text-slate-900">{lead.name}</div>
                       <div className="text-sm text-slate-500">+91 {lead.phone}</div>
+                      {lead.companyName && (
+                        <div className="text-xs font-medium text-slate-400 mt-0.5 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                          {lead.companyName}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="font-normal text-slate-600 bg-slate-50">
