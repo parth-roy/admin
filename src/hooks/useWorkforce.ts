@@ -49,3 +49,34 @@ export function useCreditWorkerWallet() {
     },
   });
 }
+
+export function useSuspendWorker() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const res = await api.patch(`/admin/workforce/${id}/suspend`, { isActive });
+      return res.data;
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["worker", id] });
+      queryClient.invalidateQueries({ queryKey: ["workforce"] });
+    },
+  });
+}
+
+export function useRevokeWorkerVerification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await api.patch(`/admin/workforce/${id}/revoke-verification`);
+      return res.data;
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["worker", id] });
+      queryClient.invalidateQueries({ queryKey: ["workforce"] });
+      // Also invalidate pending documents as they are now back in pending list
+      queryClient.invalidateQueries({ queryKey: ["pendingWorkerDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["pendingWorkerDocumentsCount"] });
+    },
+  });
+}

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, ChevronLeft, ChevronRight, Loader2, Edit, CheckCircle, XCircle } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Loader2, Edit, CheckCircle, XCircle, Eye, FileImage, ShieldAlert, Ban } from "lucide-react";
 import { PageHeader } from "@/components/admin/AdminTopbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { useWorkforce, useUpdateWorkerBank, useCreditWorkerWallet } from "@/hooks/useWorkforce";
+import { useWorkforce, useUpdateWorkerBank, useCreditWorkerWallet, useWorker, useSuspendWorker, useRevokeWorkerVerification } from "@/hooks/useWorkforce";
 import { useDebounce } from "@/hooks/useDebounce";
 import { toast } from "sonner";
 import { Wallet } from "lucide-react";
@@ -34,6 +34,7 @@ function WorkforceList() {
   
   const [editingWorker, setEditingWorker] = useState<any>(null);
   const [creditingWorker, setCreditingWorker] = useState<any>(null);
+  const [viewingWorkerId, setViewingWorkerId] = useState<string | null>(null);
 
   const { data, isLoading } = useWorkforce({
     page,
@@ -87,7 +88,8 @@ function WorkforceList() {
             <TableHeader className="bg-muted/50">
               <TableRow>
                 <TableHead>Worker</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Work Status</TableHead>
+                <TableHead>Doc Status</TableHead>
                 <TableHead>Bank Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -99,12 +101,13 @@ function WorkforceList() {
                     <TableCell><Skeleton className="h-10 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
                   </TableRow>
                 ))
               ) : data?.data?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
                     No workforce members found.
                   </TableCell>
                 </TableRow>
@@ -121,6 +124,21 @@ function WorkforceList() {
                       <StatusBadge status={worker.status} />
                     </TableCell>
                     <TableCell>
+                      {worker.isDocVerified ? (
+                        <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                          <CheckCircle className="w-3 h-3 mr-1" /> Verified
+                        </Badge>
+                      ) : worker.documents?.length > 0 ? (
+                        <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Pending
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                          <XCircle className="w-3 h-3 mr-1" /> Unverified
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       {worker.bankVerified ? (
                         <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
                           <CheckCircle className="w-3 h-3 mr-1" /> Verified
@@ -133,6 +151,14 @@ function WorkforceList() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 gap-1"
+                          onClick={() => setViewingWorkerId(worker.id)}
+                        >
+                          <Eye className="h-4 w-4" /> Profile
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -196,6 +222,14 @@ function WorkforceList() {
           worker={creditingWorker}
           open={!!creditingWorker}
           onOpenChange={(open) => !open && setCreditingWorker(null)}
+        />
+      )}
+
+      {viewingWorkerId && (
+        <WorkerProfileDialog
+          workerId={viewingWorkerId}
+          open={!!viewingWorkerId}
+          onOpenChange={(open) => !open && setViewingWorkerId(null)}
         />
       )}
     </div>
@@ -352,6 +386,114 @@ function BankDetailsDialog({ worker, open, onOpenChange }: { worker: any, open: 
             Save Changes
           </Button>
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+export function WorkerProfileDialog({ workerId, open, onOpenChange }: { workerId: string; open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { data: worker, isLoading } = useWorker(workerId);
+  const suspendMut = useSuspendWorker();
+  const revokeMut = useRevokeWorkerVerification();
+
+  const handleSuspend = async () => {
+    if (!worker) return;
+    const isActive = !worker.isActive;
+    try {
+      await suspendMut.mutateAsync({ id: worker.id, isActive });
+      toast.success(isActive ? "Worker activated" : "Worker suspended");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
+  const handleRevoke = async () => {
+    if (!worker) return;
+    if (!confirm("Are you sure you want to revoke their verification? They will need to be re-verified.")) return;
+    try {
+      await revokeMut.mutateAsync(worker.id);
+      toast.success("Verification revoked. Documents moved to pending.");
+      onOpenChange(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to revoke verification");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Worker Profile</DialogTitle>
+          <DialogDescription>Full details and documents for this workforce member.</DialogDescription>
+        </DialogHeader>
+        {isLoading || !worker ? (
+          <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin" /></div>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                {worker.user?.profileImageUrl ? (
+                  <img src={worker.user.profileImageUrl} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xl font-bold text-slate-400">{worker.user?.name?.charAt(0) || '?'}</span>
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  {worker.user?.name || "Unknown"}
+                  {!worker.isActive && <Badge variant="destructive">Suspended</Badge>}
+                </h3>
+                <p className="text-muted-foreground">{worker.user?.phone} &middot; {worker.user?.email || 'No email'}</p>
+              </div>
+              <div className="flex flex-col gap-2 items-end">
+                <Button variant={worker.isActive ? "destructive" : "default"} size="sm" onClick={handleSuspend} disabled={suspendMut.isPending}>
+                  {suspendMut.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Ban className="w-4 h-4 mr-2" />}
+                  {worker.isActive ? "Suspend Worker" : "Activate Worker"}
+                </Button>
+                {worker.isDocVerified && (
+                  <Button variant="outline" size="sm" onClick={handleRevoke} disabled={revokeMut.isPending}>
+                    {revokeMut.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldAlert className="w-4 h-4 mr-2" />}
+                    Revoke Verification
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="p-3 bg-slate-50"><div className="text-xs text-muted-foreground">Rating</div><div className="font-bold">{worker.rating} ⭐</div></Card>
+              <Card className="p-3 bg-slate-50"><div className="text-xs text-muted-foreground">Total Jobs</div><div className="font-bold">{worker.totalJobs}</div></Card>
+              <Card className="p-3 bg-slate-50"><div className="text-xs text-muted-foreground">Acceptance</div><div className="font-bold">{worker.acceptanceRate}%</div></Card>
+              <Card className="p-3 bg-slate-50"><div className="text-xs text-muted-foreground">Verification</div><div className="font-bold">{worker.isDocVerified ? <span className="text-green-600">Verified</span> : <span className="text-yellow-600">Pending</span>}</div></Card>
+            </div>
+
+            <div>
+              <h4 className="font-medium mb-3">Documents</h4>
+              {(!worker.documents || worker.documents.length === 0) ? (
+                <p className="text-sm text-muted-foreground">No documents uploaded.</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {worker.documents.map((doc: any) => (
+                    <div key={doc.id} className="flex flex-col gap-2">
+                      <span className="text-xs font-semibold uppercase text-muted-foreground flex items-center justify-between">
+                        {doc.type}
+                        {doc.status === 'APPROVED' && <CheckCircle className="w-3 h-3 text-green-500" />}
+                        {doc.status === 'REJECTED' && <XCircle className="w-3 h-3 text-red-500" />}
+                        {doc.status === 'PENDING' && <Loader2 className="w-3 h-3 text-yellow-500 animate-spin" />}
+                      </span>
+                      <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="block relative group rounded-md overflow-hidden border">
+                        <div className="aspect-square bg-slate-100 flex items-center justify-center">
+                          <img src={doc.fileUrl} alt={doc.type} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <FileImage className="text-white h-6 w-6" />
+                        </div>
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
