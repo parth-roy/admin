@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, ArrowLeft, CheckCircle, XCircle, FileImage, ExternalLink } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 
 export const Route = createFileRoute('/platform/form-driver-leads/$id')({
@@ -14,7 +14,6 @@ export const Route = createFileRoute('/platform/form-driver-leads/$id')({
 
 function FormDriverLeadDetailPage() {
   const { id } = Route.useParams();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: lead, isLoading } = useQuery({
@@ -31,14 +30,10 @@ function FormDriverLeadDetailPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['form-driver-leads'] });
-      toast({ title: 'Status updated successfully' });
+      toast.success('Status updated successfully');
     },
     onError: (error: any) => {
-      toast({
-        variant: 'destructive',
-        title: 'Error updating status',
-        description: error.response?.data?.message || 'An error occurred',
-      });
+      toast.error(error.response?.data?.message || 'Error updating status');
     },
   });
 
