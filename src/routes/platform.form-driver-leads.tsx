@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiClient as api } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
 import {
   Table,
