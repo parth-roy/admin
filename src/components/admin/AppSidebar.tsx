@@ -69,6 +69,7 @@ const sections = [
       { title: "Training", url: "/platform/training", icon: GraduationCap },
       { title: "All Leads", url: "/platform/leads", icon: ClipboardList },
       { title: "Gig Jobs", url: "/platform/gigs", icon: ClipboardList },
+      { title: "Form Driver Leads", url: "/platform/form-driver-leads", icon: ClipboardList },
     ],
   },
   {
