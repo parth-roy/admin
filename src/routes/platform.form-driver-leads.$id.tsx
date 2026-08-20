@@ -130,6 +130,18 @@ function FormDriverLeadDetailPage() {
                   <p className="font-medium text-slate-900">{lead.city}</p>
                 </div>
                 <div>
+                  <p className="text-sm text-slate-500 mb-1">Email</p>
+                  <p className="font-medium text-slate-900">{lead.email || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">State</p>
+                  <p className="font-medium text-slate-900">{lead.state || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Transport Hub</p>
+                  <p className="font-medium text-slate-900">{lead.transportHub || 'N/A'}</p>
+                </div>
+                <div>
                   <p className="text-sm text-slate-500 mb-1">Submitted On</p>
                   <p className="font-medium text-slate-900">{new Date(lead.createdAt).toLocaleString()}</p>
                 </div>

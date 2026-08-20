@@ -31,6 +31,7 @@ import { Route as PlatformNotificationsRouteImport } from './routes/platform.not
 import { Route as PlatformLeadsRouteImport } from './routes/platform.leads'
 import { Route as PlatformGigsRouteImport } from './routes/platform.gigs'
 import { Route as PlatformGamificationRouteImport } from './routes/platform.gamification'
+import { Route as PlatformFormDriverLeadsRouteImport } from './routes/platform.form-driver-leads'
 import { Route as PlatformAnnouncementsRouteImport } from './routes/platform.announcements'
 import { Route as FleetTrucksRouteImport } from './routes/fleet.trucks'
 import { Route as FleetOwnersRouteImport } from './routes/fleet.owners'
@@ -44,6 +45,7 @@ import { Route as FinanceEarningsRouteImport } from './routes/finance.earnings'
 import { Route as ComplianceUlipRouteImport } from './routes/compliance.ulip'
 import { Route as ComplianceExpiryRouteImport } from './routes/compliance.expiry'
 import { Route as BookingsIdRouteImport } from './routes/bookings.$id'
+import { Route as PlatformFormDriverLeadsIdRouteImport } from './routes/platform.form-driver-leads.$id'
 
 const WorkforceRoute = WorkforceRouteImport.update({
   id: '/workforce',
@@ -156,6 +158,11 @@ const PlatformGamificationRoute = PlatformGamificationRouteImport.update({
   path: '/platform/gamification',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformFormDriverLeadsRoute = PlatformFormDriverLeadsRouteImport.update({
+  id: '/platform/form-driver-leads',
+  path: '/platform/form-driver-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlatformAnnouncementsRoute = PlatformAnnouncementsRouteImport.update({
   id: '/platform/announcements',
   path: '/platform/announcements',
@@ -221,6 +228,12 @@ const BookingsIdRoute = BookingsIdRouteImport.update({
   path: '/bookings/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformFormDriverLeadsIdRoute =
+  PlatformFormDriverLeadsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => PlatformFormDriverLeadsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -249,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/fleet/owners': typeof FleetOwnersRoute
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
+  '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRouteWithChildren
   '/platform/gamification': typeof PlatformGamificationRoute
   '/platform/gigs': typeof PlatformGigsRoute
   '/platform/leads': typeof PlatformLeadsRoute
@@ -258,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
+  '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -286,6 +301,7 @@ export interface FileRoutesByTo {
   '/fleet/owners': typeof FleetOwnersRoute
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
+  '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRouteWithChildren
   '/platform/gamification': typeof PlatformGamificationRoute
   '/platform/gigs': typeof PlatformGigsRoute
   '/platform/leads': typeof PlatformLeadsRoute
@@ -295,6 +311,7 @@ export interface FileRoutesByTo {
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings': typeof BookingsIndexRoute
+  '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -324,6 +341,7 @@ export interface FileRoutesById {
   '/fleet/owners': typeof FleetOwnersRoute
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
+  '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRouteWithChildren
   '/platform/gamification': typeof PlatformGamificationRoute
   '/platform/gigs': typeof PlatformGigsRoute
   '/platform/leads': typeof PlatformLeadsRoute
@@ -333,6 +351,7 @@ export interface FileRoutesById {
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/workforce_/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
+  '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -363,6 +382,7 @@ export interface FileRouteTypes {
     | '/fleet/owners'
     | '/fleet/trucks'
     | '/platform/announcements'
+    | '/platform/form-driver-leads'
     | '/platform/gamification'
     | '/platform/gigs'
     | '/platform/leads'
@@ -372,6 +392,7 @@ export interface FileRouteTypes {
     | '/platform/workforce-announcements'
     | '/workforce/verification'
     | '/bookings/'
+    | '/platform/form-driver-leads/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -400,6 +421,7 @@ export interface FileRouteTypes {
     | '/fleet/owners'
     | '/fleet/trucks'
     | '/platform/announcements'
+    | '/platform/form-driver-leads'
     | '/platform/gamification'
     | '/platform/gigs'
     | '/platform/leads'
@@ -409,6 +431,7 @@ export interface FileRouteTypes {
     | '/platform/workforce-announcements'
     | '/workforce/verification'
     | '/bookings'
+    | '/platform/form-driver-leads/$id'
   id:
     | '__root__'
     | '/'
@@ -437,6 +460,7 @@ export interface FileRouteTypes {
     | '/fleet/owners'
     | '/fleet/trucks'
     | '/platform/announcements'
+    | '/platform/form-driver-leads'
     | '/platform/gamification'
     | '/platform/gigs'
     | '/platform/leads'
@@ -446,6 +470,7 @@ export interface FileRouteTypes {
     | '/platform/workforce-announcements'
     | '/workforce_/verification'
     | '/bookings/'
+    | '/platform/form-driver-leads/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -473,6 +498,7 @@ export interface RootRouteChildren {
   FleetOwnersRoute: typeof FleetOwnersRoute
   FleetTrucksRoute: typeof FleetTrucksRoute
   PlatformAnnouncementsRoute: typeof PlatformAnnouncementsRoute
+  PlatformFormDriverLeadsRoute: typeof PlatformFormDriverLeadsRouteWithChildren
   PlatformGamificationRoute: typeof PlatformGamificationRoute
   PlatformGigsRoute: typeof PlatformGigsRoute
   PlatformLeadsRoute: typeof PlatformLeadsRoute
@@ -640,6 +666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformGamificationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/form-driver-leads': {
+      id: '/platform/form-driver-leads'
+      path: '/platform/form-driver-leads'
+      fullPath: '/platform/form-driver-leads'
+      preLoaderRoute: typeof PlatformFormDriverLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform/announcements': {
       id: '/platform/announcements'
       path: '/platform/announcements'
@@ -731,6 +764,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/form-driver-leads/$id': {
+      id: '/platform/form-driver-leads/$id'
+      path: '/$id'
+      fullPath: '/platform/form-driver-leads/$id'
+      preLoaderRoute: typeof PlatformFormDriverLeadsIdRouteImport
+      parentRoute: typeof PlatformFormDriverLeadsRoute
+    }
   }
 }
 
@@ -747,6 +787,20 @@ const ComplianceRouteChildren: ComplianceRouteChildren = {
 const ComplianceRouteWithChildren = ComplianceRoute._addFileChildren(
   ComplianceRouteChildren,
 )
+
+interface PlatformFormDriverLeadsRouteChildren {
+  PlatformFormDriverLeadsIdRoute: typeof PlatformFormDriverLeadsIdRoute
+}
+
+const PlatformFormDriverLeadsRouteChildren: PlatformFormDriverLeadsRouteChildren =
+  {
+    PlatformFormDriverLeadsIdRoute: PlatformFormDriverLeadsIdRoute,
+  }
+
+const PlatformFormDriverLeadsRouteWithChildren =
+  PlatformFormDriverLeadsRoute._addFileChildren(
+    PlatformFormDriverLeadsRouteChildren,
+  )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -773,6 +827,7 @@ const rootRouteChildren: RootRouteChildren = {
   FleetOwnersRoute: FleetOwnersRoute,
   FleetTrucksRoute: FleetTrucksRoute,
   PlatformAnnouncementsRoute: PlatformAnnouncementsRoute,
+  PlatformFormDriverLeadsRoute: PlatformFormDriverLeadsRouteWithChildren,
   PlatformGamificationRoute: PlatformGamificationRoute,
   PlatformGigsRoute: PlatformGigsRoute,
   PlatformLeadsRoute: PlatformLeadsRoute,
