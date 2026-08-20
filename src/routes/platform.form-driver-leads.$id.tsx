@@ -49,9 +49,9 @@ function FormDriverLeadDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
         <h2 className="text-2xl font-bold text-slate-800">Lead not found</h2>
-        <Button asChild variant="outline">
-          <Link to="/platform/form-driver-leads">Back to Leads</Link>
-        </Button>
+        <Link to="/platform/form-driver-leads">
+          <Button variant="outline">Back to Leads</Button>
+        </Link>
       </div>
     );
   }
@@ -79,11 +79,11 @@ function FormDriverLeadDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link to="/platform/form-driver-leads">
+        <Link to="/platform/form-driver-leads">
+          <Button variant="ghost" size="icon">
             <ArrowLeft className="w-5 h-5" />
-          </Link>
-        </Button>
+          </Button>
+        </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Lead Details</h1>
           <p className="text-slate-500">Review documents and approve or reject this lead.</p>

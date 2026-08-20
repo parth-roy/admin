@@ -97,12 +97,12 @@ function FormDriverLeadsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" asChild className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                          <Link to="/platform/form-driver-leads/$id" params={{ id: lead.id }}>
+                        <Link to="/platform/form-driver-leads/$id" params={{ id: lead.id }}>
+                          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
                             <Eye className="w-4 h-4 mr-2" />
                             View
-                          </Link>
-                        </Button>
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))
