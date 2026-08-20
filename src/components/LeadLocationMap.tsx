@@ -129,7 +129,14 @@ export default function LeadLocationMap({ lead }: { lead: any }) {
         )}
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <div className="border rounded-md p-3">
+          <div 
+            onClick={() => {
+              if (hasGiven && map.current) {
+                map.current.flyTo({ center: [lead.givenLng, lead.givenLat], zoom: 15 });
+              }
+            }}
+            className={`border rounded-md p-3 transition-colors ${hasGiven ? 'cursor-pointer hover:bg-slate-50 hover:border-yellow-300' : ''}`}
+          >
             <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
               <MapPin className="w-4 h-4 text-yellow-500 mr-2" /> Claimed Location
             </div>
@@ -137,7 +144,14 @@ export default function LeadLocationMap({ lead }: { lead: any }) {
             {hasGiven && <p className="text-[10px] text-slate-400 font-mono">{lead.givenLat}, {lead.givenLng}</p>}
           </div>
           
-          <div className="border rounded-md p-3">
+          <div 
+            onClick={() => {
+              if (hasAuto && map.current) {
+                map.current.flyTo({ center: [lead.autoLng, lead.autoLat], zoom: 15 });
+              }
+            }}
+            className={`border rounded-md p-3 transition-colors ${hasAuto ? 'cursor-pointer hover:bg-slate-50 hover:border-red-300' : ''}`}
+          >
             <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
               <MapPin className="w-4 h-4 text-red-500 mr-2" /> Actual Device Location
             </div>
