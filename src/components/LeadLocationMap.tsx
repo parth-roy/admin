@@ -8,84 +8,42 @@ import { MapPin, AlertTriangle, CheckCircle } from 'lucide-react';
 const MAPBOX_TOKEN = 'pk.eyJ1IjoicGFydGhyb3k0ODAiLCJhIjoi' + 'Y21wZ3ZjdTJzMDB6ZzJwc2R0MW0zajZwayJ9' + '.EeQV2fucMtGp-bM8tuf-dg';
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
-export default function LeadLocationMap({ lead }: { lead: any }) {
+// Helper component to render a single standalone map
+function SingleMap({ lat, lng, color, popupText }: { lat: number, lng: number, color: string, popupText: string }) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
 
-  const hasGiven = lead.givenLat && lead.givenLng;
-  const hasAuto = lead.autoLat && lead.autoLng;
-
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
-    if (!hasGiven && !hasAuto) return;
-
-    const centerLng = hasGiven ? lead.givenLng : lead.autoLng;
-    const centerLat = hasGiven ? lead.givenLat : lead.autoLat;
-
+    
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [centerLng, centerLat],
-      zoom: 12
+      center: [lng, lat],
+      zoom: 14,
+      trackResize: true
     });
 
-    const bounds = new mapboxgl.LngLatBounds();
+    new mapboxgl.Marker({ color })
+      .setLngLat([lng, lat])
+      .setPopup(new mapboxgl.Popup().setHTML(`<strong>${popupText}</strong>`))
+      .addTo(map.current);
+      
+    setTimeout(() => {
+      if (map.current) map.current.resize();
+    }, 500);
+  }, [lat, lng, color, popupText]);
 
-    if (hasGiven) {
-      new mapboxgl.Marker({ color: '#eab308' })
-        .setLngLat([lead.givenLng, lead.givenLat])
-        .setPopup(new mapboxgl.Popup().setHTML('<strong>Claimed Location</strong>'))
-        .addTo(map.current);
-      bounds.extend([lead.givenLng, lead.givenLat]);
-    }
+  return (
+    <div className="relative border rounded-lg overflow-hidden h-[300px]" style={{ minHeight: '300px' }}>
+      <div ref={mapContainer} className="absolute inset-0 w-full h-full" style={{ width: '100%', height: '100%' }} />
+    </div>
+  );
+}
 
-    if (hasAuto) {
-      new mapboxgl.Marker({ color: '#ef4444' })
-        .setLngLat([lead.autoLng, lead.autoLat])
-        .setPopup(new mapboxgl.Popup().setHTML('<strong>Actual Physical Location</strong>'))
-        .addTo(map.current);
-      bounds.extend([lead.autoLng, lead.autoLat]);
-    }
-
-    if (hasGiven && hasAuto && !lead.isLocationVerified) {
-      map.current.on('load', () => {
-        if (!map.current) return;
-        map.current.addSource('route', {
-          'type': 'geojson',
-          'data': {
-            'type': 'Feature',
-            'properties': {},
-            'geometry': {
-              'type': 'LineString',
-              'coordinates': [
-                [lead.givenLng, lead.givenLat],
-                [lead.autoLng, lead.autoLat]
-              ]
-            }
-          }
-        });
-        map.current.addLayer({
-          'id': 'route',
-          'type': 'line',
-          'source': 'route',
-          'layout': {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
-          'paint': {
-            'line-color': '#94a3b8',
-            'line-width': 2,
-            'line-dasharray': [2, 4]
-          }
-        });
-      });
-    }
-
-    if (hasGiven && hasAuto) {
-      map.current.fitBounds(bounds, { padding: 50 });
-    }
-
-  }, [lead, hasGiven, hasAuto]);
+export default function LeadLocationMap({ lead }: { lead: any }) {
+  const hasGiven = lead.givenLat && lead.givenLng;
+  const hasAuto = lead.autoLat && lead.autoLng;
 
   if (!hasGiven && !hasAuto) {
     return (
@@ -99,6 +57,10 @@ export default function LeadLocationMap({ lead }: { lead: any }) {
       </Card>
     );
   }
+
+  // If verified match, just show one map.
+  // If mismatch, show two maps.
+  const isMismatch = !lead.isLocationVerified && hasGiven && hasAuto;
 
   return (
     <Card>
@@ -128,41 +90,48 @@ export default function LeadLocationMap({ lead }: { lead: any }) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <div 
-            onClick={() => {
-              if (hasGiven && map.current) {
-                map.current.flyTo({ center: [lead.givenLng, lead.givenLat], zoom: 15 });
-              }
-            }}
-            className={`border rounded-md p-3 transition-colors ${hasGiven ? 'cursor-pointer hover:bg-slate-50 hover:border-yellow-300' : ''}`}
-          >
-            <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
-              <MapPin className="w-4 h-4 text-yellow-500 mr-2" /> Claimed Location
+        {isMismatch ? (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Map 1: Claimed */}
+            <div className="space-y-3">
+              <div className="border rounded-md p-3 bg-yellow-50/30 border-yellow-200">
+                <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                  <MapPin className="w-4 h-4 text-yellow-500 mr-2" /> Claimed Location
+                </div>
+                <p className="text-xs text-slate-600 mb-1">{lead.givenAddress || 'Not provided'}</p>
+                <p className="text-[10px] text-slate-400 font-mono">{lead.givenLat}, {lead.givenLng}</p>
+              </div>
+              <SingleMap lat={lead.givenLat} lng={lead.givenLng} color="#eab308" popupText="Claimed Location" />
             </div>
-            <p className="text-xs text-slate-600 mb-1">{lead.givenAddress || 'Not provided'}</p>
-            {hasGiven && <p className="text-[10px] text-slate-400 font-mono">{lead.givenLat}, {lead.givenLng}</p>}
-          </div>
-          
-          <div 
-            onClick={() => {
-              if (hasAuto && map.current) {
-                map.current.flyTo({ center: [lead.autoLng, lead.autoLat], zoom: 15 });
-              }
-            }}
-            className={`border rounded-md p-3 transition-colors ${hasAuto ? 'cursor-pointer hover:bg-slate-50 hover:border-red-300' : ''}`}
-          >
-            <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
-              <MapPin className="w-4 h-4 text-red-500 mr-2" /> Actual Device Location
-            </div>
-            <p className="text-xs text-slate-600 mb-1">{lead.autoAddress || 'Permission Denied'}</p>
-            {hasAuto && <p className="text-[10px] text-slate-400 font-mono">{lead.autoLat}, {lead.autoLng}</p>}
-          </div>
-        </div>
 
-        <div className="relative border rounded-lg overflow-hidden h-[300px]" style={{ minHeight: '300px' }}>
-          <div ref={mapContainer} className="absolute inset-0 w-full h-full" style={{ width: '100%', height: '100%' }} />
-        </div>
+            {/* Map 2: Actual */}
+            <div className="space-y-3">
+              <div className="border rounded-md p-3 bg-red-50/30 border-red-200">
+                <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                  <MapPin className="w-4 h-4 text-red-500 mr-2" /> Actual Device Location
+                </div>
+                <p className="text-xs text-slate-600 mb-1">{lead.autoAddress || 'Permission Denied'}</p>
+                <p className="text-[10px] text-slate-400 font-mono">{lead.autoLat}, {lead.autoLng}</p>
+              </div>
+              <SingleMap lat={lead.autoLat} lng={lead.autoLng} color="#ef4444" popupText="Actual Physical Location" />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="border rounded-md p-3 bg-emerald-50/30 border-emerald-200">
+              <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                <MapPin className="w-4 h-4 text-emerald-500 mr-2" /> Verified Location
+              </div>
+              <p className="text-xs text-slate-600 mb-1">{lead.givenAddress || lead.autoAddress || 'Location recorded'}</p>
+              <p className="text-[10px] text-slate-400 font-mono">{lead.givenLat || lead.autoLat}, {lead.givenLng || lead.autoLng}</p>
+            </div>
+            {hasGiven ? (
+              <SingleMap lat={lead.givenLat} lng={lead.givenLng} color="#10b981" popupText="Verified Location" />
+            ) : hasAuto ? (
+              <SingleMap lat={lead.autoLat} lng={lead.autoLng} color="#10b981" popupText="Verified Location" />
+            ) : null}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
