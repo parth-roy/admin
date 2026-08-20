@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, ArrowLeft, CheckCircle, XCircle, FileImage, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
+import LeadLocationMap from '@/components/LeadLocationMap';
 
 export const Route = createFileRoute('/platform/form-driver-leads_/$id')({
   component: FormDriverLeadDetailPage,
@@ -238,6 +239,8 @@ function FormDriverLeadDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          <LeadLocationMap lead={lead} />
         </div>
       </div>
     </div>

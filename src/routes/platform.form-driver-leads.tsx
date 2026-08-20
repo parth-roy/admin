@@ -11,14 +11,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye, Map as MapIcon, List } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import GlobalLeadsMap from '@/components/GlobalLeadsMap';
+import { useState } from 'react';
 
 export const Route = createFileRoute('/platform/form-driver-leads')({
   component: FormDriverLeadsPage,
 });
 
 function FormDriverLeadsPage() {
+  const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
+
   const { data: leadsResponse, isLoading } = useQuery({
     queryKey: ['form-driver-leads'],
     queryFn: async () => {
@@ -29,21 +33,44 @@ function FormDriverLeadsPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Form Driver Leads</h1>
-        <p className="text-muted-foreground text-slate-500">
-          Manage driver onboarding leads from the public website form.
-        </p>
+      <div className="flex justify-between items-end mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Form Driver Leads</h1>
+          <p className="text-muted-foreground text-slate-500">
+            Manage driver onboarding leads from the public website form.
+          </p>
+        </div>
+        <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+          <Button
+            variant={viewMode === 'table' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('table')}
+            className={viewMode === 'table' ? 'shadow-sm' : ''}
+          >
+            <List className="w-4 h-4 mr-2" /> Table
+          </Button>
+          <Button
+            variant={viewMode === 'map' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('map')}
+            className={viewMode === 'map' ? 'shadow-sm' : ''}
+          >
+            <MapIcon className="w-4 h-4 mr-2" /> Map View
+          </Button>
+        </div>
       </div>
 
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-          <CardTitle>Recent Leads</CardTitle>
-          <CardDescription>
-            View and process submitted documents for driver onboarding
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
+      {viewMode === 'map' ? (
+        <GlobalLeadsMap leads={leadsResponse || []} />
+      ) : (
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+            <CardTitle>Recent Leads</CardTitle>
+            <CardDescription>
+              View and process submitted documents for driver onboarding
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
           {isLoading ? (
             <div className="flex justify-center items-center p-12">
               <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
@@ -112,6 +139,7 @@ function FormDriverLeadsPage() {
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
