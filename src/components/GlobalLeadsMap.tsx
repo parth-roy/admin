@@ -45,7 +45,7 @@ export default function GlobalLeadsMap({ leads }: { leads: any[] }) {
     if (!map.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: 'mapbox://styles/mapbox/streets-v12',
         center: [78.9629, 20.5937], // Center of India
         zoom: 4
       });
