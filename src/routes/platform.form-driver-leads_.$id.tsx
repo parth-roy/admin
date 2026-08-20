@@ -8,7 +8,7 @@ import { Loader2, ArrowLeft, CheckCircle, XCircle, FileImage, ExternalLink } fro
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 
-export const Route = createFileRoute('/platform/form-driver-leads/$id')({
+export const Route = createFileRoute('/platform/form-driver-leads_/$id')({
   component: FormDriverLeadDetailPage,
 });
 
