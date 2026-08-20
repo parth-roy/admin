@@ -136,7 +136,7 @@ export default function GlobalLeadsMap({ leads }: { leads: any[] }) {
       </div>
 
       {/* Map Container */}
-      <div ref={mapContainer} className="flex-1 w-full h-full" />
+      <div ref={mapContainer} className="flex-1 w-full h-full" style={{ minHeight: '600px', width: '100%', height: '100%' }} />
     </div>
   );
 }

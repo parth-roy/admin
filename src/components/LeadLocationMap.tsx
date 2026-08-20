@@ -146,8 +146,8 @@ export default function LeadLocationMap({ lead }: { lead: any }) {
           </div>
         </div>
 
-        <div className="relative border rounded-lg overflow-hidden h-[300px]">
-          <div ref={mapContainer} className="absolute inset-0" />
+        <div className="relative border rounded-lg overflow-hidden h-[300px]" style={{ minHeight: '300px' }}>
+          <div ref={mapContainer} className="absolute inset-0 w-full h-full" style={{ width: '100%', height: '100%' }} />
         </div>
       </CardContent>
     </Card>
