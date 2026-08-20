@@ -131,7 +131,7 @@ export default function LeadLocationMap({ lead }: { lead: any }) {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           <div className="border rounded-md p-3">
             <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2" /> Claimed Location
+              <MapPin className="w-4 h-4 text-yellow-500 mr-2" /> Claimed Location
             </div>
             <p className="text-xs text-slate-600 mb-1">{lead.givenAddress || 'Not provided'}</p>
             {hasGiven && <p className="text-[10px] text-slate-400 font-mono">{lead.givenLat}, {lead.givenLng}</p>}
@@ -139,7 +139,7 @@ export default function LeadLocationMap({ lead }: { lead: any }) {
           
           <div className="border rounded-md p-3">
             <div className="flex items-center text-sm font-semibold text-slate-700 mb-2">
-              <div className="w-3 h-3 rounded-full bg-red-500 mr-2" /> Actual Device Location
+              <MapPin className="w-4 h-4 text-red-500 mr-2" /> Actual Device Location
             </div>
             <p className="text-xs text-slate-600 mb-1">{lead.autoAddress || 'Permission Denied'}</p>
             {hasAuto && <p className="text-[10px] text-slate-400 font-mono">{lead.autoLat}, {lead.autoLng}</p>}
