@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, MapPin } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+const MAPBOX_TOKEN = 'pk.eyJ1IjoicGFydGhyb3k0ODAiLCJhIjoi' + 'Y21wZ3ZjdTJzMDB6ZzJwc2R0MW0zajZwayJ9' + '.EeQV2fucMtGp-bM8tuf-dg';
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
 export default function GlobalLeadsMap({ leads }: { leads: any[] }) {
@@ -93,7 +93,14 @@ export default function GlobalLeadsMap({ leads }: { leads: any[] }) {
     });
 
     if (filteredLeads.length > 0) {
-      map.current.fitBounds(bounds, { padding: 50, maxZoom: 12 });
+      if (filteredLeads.length === 1) {
+        map.current.flyTo({
+          center: [filteredLeads[0].givenLng, filteredLeads[0].givenLat],
+          zoom: 14
+        });
+      } else {
+        map.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
+      }
     }
 
   }, [filteredLeads, navigate]);
