@@ -29,8 +29,8 @@ import { Route as PlatformTrainingRouteImport } from './routes/platform.training
 import { Route as PlatformPricingRouteImport } from './routes/platform.pricing'
 import { Route as PlatformNotificationsRouteImport } from './routes/platform.notifications'
 import { Route as PlatformLeadsRouteImport } from './routes/platform.leads'
-import { Route as PlatformGigsRouteImport } from './routes/platform.gigs'
 import { Route as PlatformGamificationRouteImport } from './routes/platform.gamification'
+import { Route as PlatformFormGigOnboardLeadsRouteImport } from './routes/platform.form-gig-onboard-leads'
 import { Route as PlatformFormDriverLeadsRouteImport } from './routes/platform.form-driver-leads'
 import { Route as PlatformAnnouncementsRouteImport } from './routes/platform.announcements'
 import { Route as FleetTrucksRouteImport } from './routes/fleet.trucks'
@@ -45,6 +45,7 @@ import { Route as FinanceEarningsRouteImport } from './routes/finance.earnings'
 import { Route as ComplianceUlipRouteImport } from './routes/compliance.ulip'
 import { Route as ComplianceExpiryRouteImport } from './routes/compliance.expiry'
 import { Route as BookingsIdRouteImport } from './routes/bookings.$id'
+import { Route as PlatformFormGigOnboardLeadsIdRouteImport } from './routes/platform.form-gig-onboard-leads_.$id'
 import { Route as PlatformFormDriverLeadsIdRouteImport } from './routes/platform.form-driver-leads_.$id'
 
 const WorkforceRoute = WorkforceRouteImport.update({
@@ -148,16 +149,17 @@ const PlatformLeadsRoute = PlatformLeadsRouteImport.update({
   path: '/platform/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlatformGigsRoute = PlatformGigsRouteImport.update({
-  id: '/platform/gigs',
-  path: '/platform/gigs',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PlatformGamificationRoute = PlatformGamificationRouteImport.update({
   id: '/platform/gamification',
   path: '/platform/gamification',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformFormGigOnboardLeadsRoute =
+  PlatformFormGigOnboardLeadsRouteImport.update({
+    id: '/platform/form-gig-onboard-leads',
+    path: '/platform/form-gig-onboard-leads',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PlatformFormDriverLeadsRoute = PlatformFormDriverLeadsRouteImport.update({
   id: '/platform/form-driver-leads',
   path: '/platform/form-driver-leads',
@@ -228,6 +230,12 @@ const BookingsIdRoute = BookingsIdRouteImport.update({
   path: '/bookings/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformFormGigOnboardLeadsIdRoute =
+  PlatformFormGigOnboardLeadsIdRouteImport.update({
+    id: '/platform/form-gig-onboard-leads_/$id',
+    path: '/platform/form-gig-onboard-leads/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PlatformFormDriverLeadsIdRoute =
   PlatformFormDriverLeadsIdRouteImport.update({
     id: '/platform/form-driver-leads_/$id',
@@ -263,8 +271,8 @@ export interface FileRoutesByFullPath {
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRoute
+  '/platform/form-gig-onboard-leads': typeof PlatformFormGigOnboardLeadsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
-  '/platform/gigs': typeof PlatformGigsRoute
   '/platform/leads': typeof PlatformLeadsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
@@ -273,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
   '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
+  '/platform/form-gig-onboard-leads/$id': typeof PlatformFormGigOnboardLeadsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -302,8 +311,8 @@ export interface FileRoutesByTo {
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRoute
+  '/platform/form-gig-onboard-leads': typeof PlatformFormGigOnboardLeadsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
-  '/platform/gigs': typeof PlatformGigsRoute
   '/platform/leads': typeof PlatformLeadsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
@@ -312,6 +321,7 @@ export interface FileRoutesByTo {
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings': typeof BookingsIndexRoute
   '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
+  '/platform/form-gig-onboard-leads/$id': typeof PlatformFormGigOnboardLeadsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -342,8 +352,8 @@ export interface FileRoutesById {
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
   '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRoute
+  '/platform/form-gig-onboard-leads': typeof PlatformFormGigOnboardLeadsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
-  '/platform/gigs': typeof PlatformGigsRoute
   '/platform/leads': typeof PlatformLeadsRoute
   '/platform/notifications': typeof PlatformNotificationsRoute
   '/platform/pricing': typeof PlatformPricingRoute
@@ -352,6 +362,7 @@ export interface FileRoutesById {
   '/workforce_/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
   '/platform/form-driver-leads_/$id': typeof PlatformFormDriverLeadsIdRoute
+  '/platform/form-gig-onboard-leads_/$id': typeof PlatformFormGigOnboardLeadsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -383,8 +394,8 @@ export interface FileRouteTypes {
     | '/fleet/trucks'
     | '/platform/announcements'
     | '/platform/form-driver-leads'
+    | '/platform/form-gig-onboard-leads'
     | '/platform/gamification'
-    | '/platform/gigs'
     | '/platform/leads'
     | '/platform/notifications'
     | '/platform/pricing'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/workforce/verification'
     | '/bookings/'
     | '/platform/form-driver-leads/$id'
+    | '/platform/form-gig-onboard-leads/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -422,8 +434,8 @@ export interface FileRouteTypes {
     | '/fleet/trucks'
     | '/platform/announcements'
     | '/platform/form-driver-leads'
+    | '/platform/form-gig-onboard-leads'
     | '/platform/gamification'
-    | '/platform/gigs'
     | '/platform/leads'
     | '/platform/notifications'
     | '/platform/pricing'
@@ -432,6 +444,7 @@ export interface FileRouteTypes {
     | '/workforce/verification'
     | '/bookings'
     | '/platform/form-driver-leads/$id'
+    | '/platform/form-gig-onboard-leads/$id'
   id:
     | '__root__'
     | '/'
@@ -461,8 +474,8 @@ export interface FileRouteTypes {
     | '/fleet/trucks'
     | '/platform/announcements'
     | '/platform/form-driver-leads'
+    | '/platform/form-gig-onboard-leads'
     | '/platform/gamification'
-    | '/platform/gigs'
     | '/platform/leads'
     | '/platform/notifications'
     | '/platform/pricing'
@@ -471,6 +484,7 @@ export interface FileRouteTypes {
     | '/workforce_/verification'
     | '/bookings/'
     | '/platform/form-driver-leads_/$id'
+    | '/platform/form-gig-onboard-leads_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -499,8 +513,8 @@ export interface RootRouteChildren {
   FleetTrucksRoute: typeof FleetTrucksRoute
   PlatformAnnouncementsRoute: typeof PlatformAnnouncementsRoute
   PlatformFormDriverLeadsRoute: typeof PlatformFormDriverLeadsRoute
+  PlatformFormGigOnboardLeadsRoute: typeof PlatformFormGigOnboardLeadsRoute
   PlatformGamificationRoute: typeof PlatformGamificationRoute
-  PlatformGigsRoute: typeof PlatformGigsRoute
   PlatformLeadsRoute: typeof PlatformLeadsRoute
   PlatformNotificationsRoute: typeof PlatformNotificationsRoute
   PlatformPricingRoute: typeof PlatformPricingRoute
@@ -509,6 +523,7 @@ export interface RootRouteChildren {
   WorkforceVerificationRoute: typeof WorkforceVerificationRoute
   BookingsIndexRoute: typeof BookingsIndexRoute
   PlatformFormDriverLeadsIdRoute: typeof PlatformFormDriverLeadsIdRoute
+  PlatformFormGigOnboardLeadsIdRoute: typeof PlatformFormGigOnboardLeadsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -653,18 +668,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/platform/gigs': {
-      id: '/platform/gigs'
-      path: '/platform/gigs'
-      fullPath: '/platform/gigs'
-      preLoaderRoute: typeof PlatformGigsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/platform/gamification': {
       id: '/platform/gamification'
       path: '/platform/gamification'
       fullPath: '/platform/gamification'
       preLoaderRoute: typeof PlatformGamificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/form-gig-onboard-leads': {
+      id: '/platform/form-gig-onboard-leads'
+      path: '/platform/form-gig-onboard-leads'
+      fullPath: '/platform/form-gig-onboard-leads'
+      preLoaderRoute: typeof PlatformFormGigOnboardLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/form-driver-leads': {
@@ -765,6 +780,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/form-gig-onboard-leads_/$id': {
+      id: '/platform/form-gig-onboard-leads_/$id'
+      path: '/platform/form-gig-onboard-leads/$id'
+      fullPath: '/platform/form-gig-onboard-leads/$id'
+      preLoaderRoute: typeof PlatformFormGigOnboardLeadsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform/form-driver-leads_/$id': {
       id: '/platform/form-driver-leads_/$id'
       path: '/platform/form-driver-leads/$id'
@@ -815,8 +837,8 @@ const rootRouteChildren: RootRouteChildren = {
   FleetTrucksRoute: FleetTrucksRoute,
   PlatformAnnouncementsRoute: PlatformAnnouncementsRoute,
   PlatformFormDriverLeadsRoute: PlatformFormDriverLeadsRoute,
+  PlatformFormGigOnboardLeadsRoute: PlatformFormGigOnboardLeadsRoute,
   PlatformGamificationRoute: PlatformGamificationRoute,
-  PlatformGigsRoute: PlatformGigsRoute,
   PlatformLeadsRoute: PlatformLeadsRoute,
   PlatformNotificationsRoute: PlatformNotificationsRoute,
   PlatformPricingRoute: PlatformPricingRoute,
@@ -825,6 +847,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkforceVerificationRoute: WorkforceVerificationRoute,
   BookingsIndexRoute: BookingsIndexRoute,
   PlatformFormDriverLeadsIdRoute: PlatformFormDriverLeadsIdRoute,
+  PlatformFormGigOnboardLeadsIdRoute: PlatformFormGigOnboardLeadsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
