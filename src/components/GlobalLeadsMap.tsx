@@ -10,7 +10,7 @@ import { useNavigate } from '@tanstack/react-router';
 const MAPBOX_TOKEN = 'pk.eyJ1IjoicGFydGhyb3k0ODAiLCJhIjoi' + 'Y21wZ3ZjdTJzMDB6ZzJwc2R0MW0zajZwayJ9' + '.EeQV2fucMtGp-bM8tuf-dg';
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
-export default function GlobalLeadsMap({ leads }: { leads: any[] }) {
+export default function GlobalLeadsMap({ leads, type = 'driver' }: { leads: any[], type?: 'driver' | 'gig' }) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<{ [key: string]: mapboxgl.Marker }>({});
@@ -29,7 +29,7 @@ export default function GlobalLeadsMap({ leads }: { leads: any[] }) {
   const filteredLeads = leads.filter(lead => {
     const s = lead.givenState || lead.state;
     const c = lead.givenDistrict || lead.city;
-    const n = lead.name || '';
+    const n = lead.name || (lead.firstName ? `${lead.firstName} ${lead.lastName}` : '');
     
     if (stateFilter !== 'ALL' && s !== stateFilter) return false;
     if (cityFilter !== 'ALL' && c !== cityFilter) return false;
@@ -70,16 +70,19 @@ export default function GlobalLeadsMap({ leads }: { leads: any[] }) {
 
       // Click to view details
       el.addEventListener('click', () => {
-        navigate({ to: '/platform/form-driver-leads/$id', params: { id: lead.id } });
+        navigate({ to: type === 'gig' ? '/platform/form-gig-onboard-leads/$id' : '/platform/form-driver-leads/$id', params: { id: lead.id } });
       });
 
       // Hover popup
+      
+      const displayName = lead.name || (lead.firstName ? `${lead.firstName} ${lead.lastName}` : 'Unknown');
+      const displayRole = type === 'gig' ? (lead.jobType ? lead.jobType.replace(/-/g, ' ') : 'Worker') : (lead.vehicleType ? lead.vehicleType.replace(/_/g, ' ') : 'Driver');
       const popup = new mapboxgl.Popup({ offset: 25, closeButton: false, closeOnClick: false })
         .setHTML(`
           <div class="p-2">
-            <p class="font-bold text-sm text-slate-800">${lead.name}</p>
-            <p class="text-xs text-slate-500">${lead.vehicleType.replace(/_/g, ' ')}</p>
-            <p class="text-[10px] mt-1 text-slate-400">${lead.givenDistrict || lead.city}, ${lead.givenState || lead.state}</p>
+            <p class="font-bold text-sm text-slate-800 capitalize">${displayName}</p>
+            <p class="text-xs text-slate-500 capitalize">${displayRole}</p>
+            <p class="text-[10px] mt-1 text-slate-400">${lead.givenDistrict || lead.city || 'Unknown'}, ${lead.givenState || lead.state || ''}</p>
           </div>
         `);
         
@@ -114,7 +117,7 @@ export default function GlobalLeadsMap({ leads }: { leads: any[] }) {
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Search driver name..."
+                placeholder={type === 'gig' ? "Search worker name..." : "Search driver name..."}
                 className="pl-9 h-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

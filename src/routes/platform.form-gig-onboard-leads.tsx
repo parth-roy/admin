@@ -61,7 +61,7 @@ function FormGigOnboardLeadsPage() {
       </div>
 
       {viewMode === 'map' ? (
-        <GlobalLeadsMap leads={leadsResponse || []} />
+        <GlobalLeadsMap leads={leadsResponse || []} type="gig" />
       ) : (
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">

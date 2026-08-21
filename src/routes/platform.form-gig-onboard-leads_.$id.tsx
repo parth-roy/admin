@@ -145,34 +145,7 @@ function FormGigLeadDetailPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-              <CardTitle className="text-lg">Location Context</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Given City</p>
-                  <p className="font-medium text-slate-900">{lead.city}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Given Area/Pincode</p>
-                  <p className="font-medium text-slate-900">{lead.area || 'N/A'}</p>
-                </div>
-              </div>
-
-              {lead.givenLat && lead.givenLng && (
-                <div className="border border-slate-200 rounded-xl overflow-hidden h-[300px]">
-                  <LeadLocationMap 
-                    givenLat={lead.givenLat} 
-                    givenLng={lead.givenLng} 
-                    autoLat={lead.autoLat} 
-                    autoLng={lead.autoLng} 
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <LeadLocationMap lead={lead} />
         </div>
 
         {/* Right Column: Documents & Actions */}
