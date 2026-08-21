@@ -68,7 +68,7 @@ const sections = [
       { title: "Gamification", url: "/platform/gamification", icon: ShieldCheck },
       { title: "Training", url: "/platform/training", icon: GraduationCap },
       { title: "All Leads", url: "/platform/leads", icon: ClipboardList },
-      { title: "Gig Jobs", url: "/platform/gigs", icon: ClipboardList },
+      { title: "Form Gig Onboard Leads", url: "/platform/form-gig-onboard-leads", icon: ClipboardList },
       { title: "Form Driver Leads", url: "/platform/form-driver-leads", icon: ClipboardList },
     ],
   },
@@ -185,3 +185,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+

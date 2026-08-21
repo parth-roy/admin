@@ -16,17 +16,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import GlobalLeadsMap from '@/components/GlobalLeadsMap';
 import { useState } from 'react';
 
-export const Route = createFileRoute('/platform/form-driver-leads')({
-  component: FormDriverLeadsPage,
+export const Route = createFileRoute('/platform/form-gig-onboard-leads')({
+  component: FormGigOnboardLeadsPage,
 });
 
-function FormDriverLeadsPage() {
+function FormGigOnboardLeadsPage() {
   const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
 
   const { data: leadsResponse, isLoading } = useQuery({
-    queryKey: ['form-driver-leads'],
+    queryKey: ['form-gig-leads'],
     queryFn: async () => {
-      const { data } = await api.get('/form-driver-leads');
+      const { data } = await api.get('/form-gig-leads');
       return data.data;
     },
   });
@@ -35,9 +35,9 @@ function FormDriverLeadsPage() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-end mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Form Driver Leads</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Form Gig Onboard Leads</h1>
           <p className="text-muted-foreground text-slate-500">
-            Manage driver onboarding leads from the public website form.
+            Manage worker and gig onboarding leads from the public website form.
           </p>
         </div>
         <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
@@ -65,9 +65,9 @@ function FormDriverLeadsPage() {
       ) : (
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-            <CardTitle>Recent Leads</CardTitle>
+            <CardTitle>Recent Gig Leads</CardTitle>
             <CardDescription>
-              View and process submitted documents for driver onboarding
+              View and process submitted profiles for worker onboarding
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
@@ -84,7 +84,7 @@ function FormDriverLeadsPage() {
                   <TableHead className="font-semibold text-slate-600">Name</TableHead>
                   <TableHead className="font-semibold text-slate-600">Phone</TableHead>
                   <TableHead className="font-semibold text-slate-600">City</TableHead>
-                  <TableHead className="font-semibold text-slate-600">State</TableHead>
+                  <TableHead className="font-semibold text-slate-600">Job Type</TableHead>
                   <TableHead className="font-semibold text-slate-600">Vehicle Type</TableHead>
                   <TableHead className="font-semibold text-slate-600">Status</TableHead>
                   <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
@@ -93,7 +93,7 @@ function FormDriverLeadsPage() {
               <TableBody>
                 {leadsResponse?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                    <TableCell colSpan={8} className="text-center py-8 text-slate-500">
                       No leads found
                     </TableCell>
                   </TableRow>
@@ -103,14 +103,16 @@ function FormDriverLeadsPage() {
                       <TableCell className="font-medium text-slate-600 whitespace-nowrap">
                         {new Date(lead.createdAt).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="font-medium">{lead.name}</TableCell>
+                      <TableCell className="font-medium">{lead.firstName || lead.name} {lead.lastName || ''}</TableCell>
                       <TableCell className="text-slate-600">{lead.phone}</TableCell>
                       <TableCell className="text-slate-600">{lead.city || 'N/A'}</TableCell>
-                      <TableCell className="text-slate-600">{lead.state || lead.givenState || 'N/A'}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                          {lead.vehicleType.replace(/_/g, ' ')}
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 uppercase">
+                          {lead.jobType ? lead.jobType.replace(/-/g, ' ') : 'N/A'}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-600">
+                        {lead.vehicleType ? lead.vehicleType.replace(/_/g, ' ') : 'N/A'}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -123,11 +125,11 @@ function FormDriverLeadsPage() {
                             lead.status === 'PENDING' ? 'bg-amber-500 text-white' : ''
                           }
                         >
-                          {lead.status}
+                          {lead.status || 'PENDING'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link to="/platform/form-driver-leads/$id" params={{ id: lead.id }}>
+                        <Link to={`/platform/form-gig-onboard-leads/${lead.id}`} >
                           <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
                             <Eye className="w-4 h-4 mr-2" />
                             View
