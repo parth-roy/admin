@@ -52,7 +52,7 @@ export default function LeadLocationMap({ lead }: { lead: any }) {
           <CardTitle>Location Data</CardTitle>
         </CardHeader>
         <CardContent className="pt-6 text-center text-slate-500">
-          No location data provided by the driver.
+          No location data provided for this lead.
         </CardContent>
       </Card>
     );
