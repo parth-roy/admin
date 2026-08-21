@@ -83,6 +83,7 @@ function FormDriverLeadsPage() {
                   <TableHead className="font-semibold text-slate-600">Name</TableHead>
                   <TableHead className="font-semibold text-slate-600">Phone</TableHead>
                   <TableHead className="font-semibold text-slate-600">City</TableHead>
+                  <TableHead className="font-semibold text-slate-600">State</TableHead>
                   <TableHead className="font-semibold text-slate-600">Vehicle Type</TableHead>
                   <TableHead className="font-semibold text-slate-600">Status</TableHead>
                   <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
@@ -103,7 +104,8 @@ function FormDriverLeadsPage() {
                       </TableCell>
                       <TableCell className="font-medium">{lead.name}</TableCell>
                       <TableCell className="text-slate-600">{lead.phone}</TableCell>
-                      <TableCell className="text-slate-600">{lead.city}</TableCell>
+                      <TableCell className="text-slate-600">{lead.city || 'N/A'}</TableCell>
+                      <TableCell className="text-slate-600">{lead.state || lead.givenState || 'N/A'}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                           {lead.vehicleType.replace(/_/g, ' ')}
