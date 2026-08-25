@@ -22,8 +22,10 @@ import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkforceBookingsIndexRouteImport } from './routes/workforce-bookings.index'
 import { Route as BookingsIndexRouteImport } from './routes/bookings.index'
 import { Route as WorkforceVerificationRouteImport } from './routes/workforce_.verification'
+import { Route as WorkforceBookingsIdRouteImport } from './routes/workforce-bookings.$id'
 import { Route as PlatformWorkforceAnnouncementsRouteImport } from './routes/platform.workforce-announcements'
 import { Route as PlatformTrainingRouteImport } from './routes/platform.training'
 import { Route as PlatformPricingRouteImport } from './routes/platform.pricing'
@@ -113,6 +115,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkforceBookingsIndexRoute = WorkforceBookingsIndexRouteImport.update({
+  id: '/workforce-bookings/',
+  path: '/workforce-bookings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BookingsIndexRoute = BookingsIndexRouteImport.update({
   id: '/bookings/',
   path: '/bookings/',
@@ -121,6 +128,11 @@ const BookingsIndexRoute = BookingsIndexRouteImport.update({
 const WorkforceVerificationRoute = WorkforceVerificationRouteImport.update({
   id: '/workforce_/verification',
   path: '/workforce/verification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkforceBookingsIdRoute = WorkforceBookingsIdRouteImport.update({
+  id: '/workforce-bookings/$id',
+  path: '/workforce-bookings/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformWorkforceAnnouncementsRoute =
@@ -278,8 +290,10 @@ export interface FileRoutesByFullPath {
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
+  '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
+  '/workforce-bookings/': typeof WorkforceBookingsIndexRoute
   '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
   '/platform/form-gig-onboard-leads/$id': typeof PlatformFormGigOnboardLeadsIdRoute
 }
@@ -318,8 +332,10 @@ export interface FileRoutesByTo {
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
+  '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings': typeof BookingsIndexRoute
+  '/workforce-bookings': typeof WorkforceBookingsIndexRoute
   '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
   '/platform/form-gig-onboard-leads/$id': typeof PlatformFormGigOnboardLeadsIdRoute
 }
@@ -359,8 +375,10 @@ export interface FileRoutesById {
   '/platform/pricing': typeof PlatformPricingRoute
   '/platform/training': typeof PlatformTrainingRoute
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
+  '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce_/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
+  '/workforce-bookings/': typeof WorkforceBookingsIndexRoute
   '/platform/form-driver-leads_/$id': typeof PlatformFormDriverLeadsIdRoute
   '/platform/form-gig-onboard-leads_/$id': typeof PlatformFormGigOnboardLeadsIdRoute
 }
@@ -401,8 +419,10 @@ export interface FileRouteTypes {
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
+    | '/workforce-bookings/$id'
     | '/workforce/verification'
     | '/bookings/'
+    | '/workforce-bookings/'
     | '/platform/form-driver-leads/$id'
     | '/platform/form-gig-onboard-leads/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -441,8 +461,10 @@ export interface FileRouteTypes {
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
+    | '/workforce-bookings/$id'
     | '/workforce/verification'
     | '/bookings'
+    | '/workforce-bookings'
     | '/platform/form-driver-leads/$id'
     | '/platform/form-gig-onboard-leads/$id'
   id:
@@ -481,8 +503,10 @@ export interface FileRouteTypes {
     | '/platform/pricing'
     | '/platform/training'
     | '/platform/workforce-announcements'
+    | '/workforce-bookings/$id'
     | '/workforce_/verification'
     | '/bookings/'
+    | '/workforce-bookings/'
     | '/platform/form-driver-leads_/$id'
     | '/platform/form-gig-onboard-leads_/$id'
   fileRoutesById: FileRoutesById
@@ -520,8 +544,10 @@ export interface RootRouteChildren {
   PlatformPricingRoute: typeof PlatformPricingRoute
   PlatformTrainingRoute: typeof PlatformTrainingRoute
   PlatformWorkforceAnnouncementsRoute: typeof PlatformWorkforceAnnouncementsRoute
+  WorkforceBookingsIdRoute: typeof WorkforceBookingsIdRoute
   WorkforceVerificationRoute: typeof WorkforceVerificationRoute
   BookingsIndexRoute: typeof BookingsIndexRoute
+  WorkforceBookingsIndexRoute: typeof WorkforceBookingsIndexRoute
   PlatformFormDriverLeadsIdRoute: typeof PlatformFormDriverLeadsIdRoute
   PlatformFormGigOnboardLeadsIdRoute: typeof PlatformFormGigOnboardLeadsIdRoute
 }
@@ -619,6 +645,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workforce-bookings/': {
+      id: '/workforce-bookings/'
+      path: '/workforce-bookings'
+      fullPath: '/workforce-bookings/'
+      preLoaderRoute: typeof WorkforceBookingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bookings/': {
       id: '/bookings/'
       path: '/bookings'
@@ -631,6 +664,13 @@ declare module '@tanstack/react-router' {
       path: '/workforce/verification'
       fullPath: '/workforce/verification'
       preLoaderRoute: typeof WorkforceVerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workforce-bookings/$id': {
+      id: '/workforce-bookings/$id'
+      path: '/workforce-bookings/$id'
+      fullPath: '/workforce-bookings/$id'
+      preLoaderRoute: typeof WorkforceBookingsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/workforce-announcements': {
@@ -844,8 +884,10 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformPricingRoute: PlatformPricingRoute,
   PlatformTrainingRoute: PlatformTrainingRoute,
   PlatformWorkforceAnnouncementsRoute: PlatformWorkforceAnnouncementsRoute,
+  WorkforceBookingsIdRoute: WorkforceBookingsIdRoute,
   WorkforceVerificationRoute: WorkforceVerificationRoute,
   BookingsIndexRoute: BookingsIndexRoute,
+  WorkforceBookingsIndexRoute: WorkforceBookingsIndexRoute,
   PlatformFormDriverLeadsIdRoute: PlatformFormDriverLeadsIdRoute,
   PlatformFormGigOnboardLeadsIdRoute: PlatformFormGigOnboardLeadsIdRoute,
 }

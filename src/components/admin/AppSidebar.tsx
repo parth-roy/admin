@@ -27,6 +27,7 @@ const sections = [
     label: "Operations",
     items: [
       { title: "All Bookings", url: "/bookings", icon: ClipboardList },
+      { title: "Workforce Bookings", url: "/workforce-bookings", icon: ClipboardList },
       { title: "Dispatch Queue", url: "/dispatch", icon: Radio },
       { title: "Driver Verification", url: "/verification", icon: ShieldCheck },
       { title: "Workforce Verification", url: "/workforce/verification", icon: FileCheck2 },
