@@ -43,9 +43,9 @@ function WorkforceBookingDetailsPage() {
             <CardContent>
               <p><strong>Category:</strong> {gig.gigCategory}</p>
               <p><strong>Status:</strong> {gig.status}</p>
-              <p><strong>Urgency:</strong> {gig.urgency}</p>
+              <p><strong>Urgency:</strong> {gig.urgency?.replace('_', ' ')}</p>
               {gig.scheduledSlot && <p><strong>Slot:</strong> {gig.scheduledSlot}</p>}
-              <p><strong>Total Fare:</strong> ?{gig.totalFare}</p>
+              <p><strong>Total Fare:</strong> ₹{gig.totalFare}</p>
             </CardContent>
           </Card>
         </div>
@@ -62,15 +62,15 @@ function WorkforceBookingDetailsPage() {
                       <p className="text-xs text-slate-500">{task.category} &bull; {task.variant}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">?{task.price} x {task.quantity}</p>
-                      <p className="text-xs font-semibold text-emerald-600">Total: ?{(task.price * task.quantity).toLocaleString()}</p>
+                      <p className="font-bold">₹{task.price} x {task.quantity}</p>
+                      <p className="text-xs font-semibold text-emerald-600">Total: ₹{(task.price * task.quantity).toLocaleString()}</p>
                     </div>
                   </div>
                 ))}
               </div>
               {gig.tipAmount > 0 && (
                 <div className="mt-4 text-right pr-4 text-sm">
-                  <strong>Tip Amount:</strong> ?{gig.tipAmount}
+                  <strong>Tip Amount:</strong> ₹{gig.tipAmount}
                 </div>
               )}
             </CardContent>

@@ -48,7 +48,7 @@ function WorkforceBookingsPage() {
                     <TableCell className="font-medium">{gig.gigCategory}</TableCell>
                     <TableCell>
                       <span className="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-700">
-                        {gig.urgency}
+                        {gig.urgency?.replace('_', ' ')}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -57,7 +57,7 @@ function WorkforceBookingsPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-right font-bold">
-                      ?{gig.totalFare?.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                      ₹{gig.totalFare?.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                     </TableCell>
                   </TableRow>
                 ))
