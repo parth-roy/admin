@@ -40,9 +40,9 @@ function ForgotPasswordPage() {
       </div>
 
       <div className="relative w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#f4a31b]/15 border border-[#f4a31b]/30 mb-2">
-            <span className="text-3xl font-black text-[#f4a31b]">P</span>
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/5 border border-white/15 mb-1 p-2 shadow-2xl backdrop-blur">
+            <img src="/app-icon.png" alt="SUPER ADMIN Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-white">Reset Password</h1>
           <p className="text-sm text-zinc-500">We'll send a reset link to your Zoho email</p>

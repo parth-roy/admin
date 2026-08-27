@@ -11,8 +11,8 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: DASHBOARD_KEYS.stats,
     queryFn: dashboardApi.getStats,
-    staleTime: 60_000, // 1 min — dashboard doesn't need to be real-time
-    refetchInterval: 120_000, // auto-refresh every 2 min
+    staleTime: 10_000,
+    refetchInterval: 30_000,
   });
 }
 
@@ -20,7 +20,7 @@ export function useRevenueTrend(days = 30) {
   return useQuery({
     queryKey: DASHBOARD_KEYS.revenueTrend(days),
     queryFn: () => dashboardApi.getRevenueTrend(days),
-    staleTime: 5 * 60_000,
+    staleTime: 30_000,
   });
 }
 
@@ -28,7 +28,7 @@ export function useDashboardAlerts() {
   return useQuery({
     queryKey: DASHBOARD_KEYS.alerts,
     queryFn: dashboardApi.getAlerts,
-    staleTime: 60_000,
-    refetchInterval: 60_000,
+    staleTime: 15_000,
+    refetchInterval: 30_000,
   });
 }

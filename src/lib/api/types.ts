@@ -55,6 +55,15 @@ export interface DashboardStats {
   todayBookings: number;
   newUsers: number;
   driverApplications: number;
+  totalBookings?: number;
+  totalRevenue?: number;
+  totalDrivers?: number;
+  totalCustomers?: number;
+  totalWorkforce?: number;
+  statusDistribution?: Record<string, number>;
+  activeWorkforceJobs?: number;
+  formDriverLeadsCount?: number;
+  formGigLeadsCount?: number;
 }
 
 export interface RevenueTrendPoint {

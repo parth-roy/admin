@@ -110,29 +110,31 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/" className="flex items-center gap-2.5 px-2 py-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground font-bold text-lg">
-            P
-          </div>
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="font-display text-sm font-semibold text-sidebar-foreground">
-              Parther Admin
+        <Link to="/" className="flex items-center gap-3 px-2 py-2.5">
+          <img
+            src="/app-icon.png"
+            alt="SUPER ADMIN Logo"
+            className="h-11 w-11 rounded-xl object-contain bg-white/10 p-1 shadow-md shrink-0 border border-white/10"
+          />
+          <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+            <span className="font-display text-sm font-bold tracking-tight text-sidebar-foreground uppercase">
+              SUPER ADMIN
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-sidebar-foreground/60">
+            <span className="text-[10px] tracking-wider text-sidebar-foreground/60 font-mono">
               gomytruck.com
             </span>
           </div>
         </Link>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="no-scrollbar px-1 py-1 gap-1">
         {sections.map((section) => (
-          <SidebarGroup key={section.label}>
-            <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-widest">
+          <SidebarGroup key={section.label} className="p-1">
+            <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-widest px-2 py-1">
               {section.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="gap-0.5">
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>

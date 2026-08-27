@@ -60,10 +60,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Parther Admin — gomytruck.com" },
+      { title: "SUPER ADMIN — gomytruck.com" },
       { name: "description", content: "Operations, finance, fleet and support admin panel for Parther Logistics." },
     ],
     links: [
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "shortcut icon", href: "/favicon.ico" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
