@@ -15,13 +15,13 @@ function SingleMap({ lat, lng, color, popupText }: { lat: number, lng: number, c
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
-    
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: "mapbox://styles/mapbox/streets-v12",
       center: [lng, lat],
       zoom: 14,
-      trackResize: true
+      trackResize: true,
     });
 
     new mapboxgl.Marker({ color })
