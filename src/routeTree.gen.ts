@@ -23,6 +23,7 @@ import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkforceBookingsIndexRouteImport } from './routes/workforce-bookings.index'
+import { Route as ManualBookingsIndexRouteImport } from './routes/manual-bookings.index'
 import { Route as BookingsIndexRouteImport } from './routes/bookings.index'
 import { Route as WorkforceVerificationRouteImport } from './routes/workforce_.verification'
 import { Route as WorkforceBookingsIdRouteImport } from './routes/workforce-bookings.$id'
@@ -118,6 +119,11 @@ const IndexRoute = IndexRouteImport.update({
 const WorkforceBookingsIndexRoute = WorkforceBookingsIndexRouteImport.update({
   id: '/workforce-bookings/',
   path: '/workforce-bookings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualBookingsIndexRoute = ManualBookingsIndexRouteImport.update({
+  id: '/manual-bookings/',
+  path: '/manual-bookings/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingsIndexRoute = BookingsIndexRouteImport.update({
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
+  '/manual-bookings/': typeof ManualBookingsIndexRoute
   '/workforce-bookings/': typeof WorkforceBookingsIndexRoute
   '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
   '/platform/form-gig-onboard-leads/$id': typeof PlatformFormGigOnboardLeadsIdRoute
@@ -335,6 +342,7 @@ export interface FileRoutesByTo {
   '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
   '/bookings': typeof BookingsIndexRoute
+  '/manual-bookings': typeof ManualBookingsIndexRoute
   '/workforce-bookings': typeof WorkforceBookingsIndexRoute
   '/platform/form-driver-leads/$id': typeof PlatformFormDriverLeadsIdRoute
   '/platform/form-gig-onboard-leads/$id': typeof PlatformFormGigOnboardLeadsIdRoute
@@ -378,6 +386,7 @@ export interface FileRoutesById {
   '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce_/verification': typeof WorkforceVerificationRoute
   '/bookings/': typeof BookingsIndexRoute
+  '/manual-bookings/': typeof ManualBookingsIndexRoute
   '/workforce-bookings/': typeof WorkforceBookingsIndexRoute
   '/platform/form-driver-leads_/$id': typeof PlatformFormDriverLeadsIdRoute
   '/platform/form-gig-onboard-leads_/$id': typeof PlatformFormGigOnboardLeadsIdRoute
@@ -422,6 +431,7 @@ export interface FileRouteTypes {
     | '/workforce-bookings/$id'
     | '/workforce/verification'
     | '/bookings/'
+    | '/manual-bookings/'
     | '/workforce-bookings/'
     | '/platform/form-driver-leads/$id'
     | '/platform/form-gig-onboard-leads/$id'
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/workforce-bookings/$id'
     | '/workforce/verification'
     | '/bookings'
+    | '/manual-bookings'
     | '/workforce-bookings'
     | '/platform/form-driver-leads/$id'
     | '/platform/form-gig-onboard-leads/$id'
@@ -506,6 +517,7 @@ export interface FileRouteTypes {
     | '/workforce-bookings/$id'
     | '/workforce_/verification'
     | '/bookings/'
+    | '/manual-bookings/'
     | '/workforce-bookings/'
     | '/platform/form-driver-leads_/$id'
     | '/platform/form-gig-onboard-leads_/$id'
@@ -547,6 +559,7 @@ export interface RootRouteChildren {
   WorkforceBookingsIdRoute: typeof WorkforceBookingsIdRoute
   WorkforceVerificationRoute: typeof WorkforceVerificationRoute
   BookingsIndexRoute: typeof BookingsIndexRoute
+  ManualBookingsIndexRoute: typeof ManualBookingsIndexRoute
   WorkforceBookingsIndexRoute: typeof WorkforceBookingsIndexRoute
   PlatformFormDriverLeadsIdRoute: typeof PlatformFormDriverLeadsIdRoute
   PlatformFormGigOnboardLeadsIdRoute: typeof PlatformFormGigOnboardLeadsIdRoute
@@ -650,6 +663,13 @@ declare module '@tanstack/react-router' {
       path: '/workforce-bookings'
       fullPath: '/workforce-bookings/'
       preLoaderRoute: typeof WorkforceBookingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manual-bookings/': {
+      id: '/manual-bookings/'
+      path: '/manual-bookings'
+      fullPath: '/manual-bookings/'
+      preLoaderRoute: typeof ManualBookingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bookings/': {
@@ -887,6 +907,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkforceBookingsIdRoute: WorkforceBookingsIdRoute,
   WorkforceVerificationRoute: WorkforceVerificationRoute,
   BookingsIndexRoute: BookingsIndexRoute,
+  ManualBookingsIndexRoute: ManualBookingsIndexRoute,
   WorkforceBookingsIndexRoute: WorkforceBookingsIndexRoute,
   PlatformFormDriverLeadsIdRoute: PlatformFormDriverLeadsIdRoute,
   PlatformFormGigOnboardLeadsIdRoute: PlatformFormGigOnboardLeadsIdRoute,
