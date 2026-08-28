@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft, Copy, MapPin, Phone, Receipt, Star, XCircle, Loader2,
   UserCheck, AlertTriangle,
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useBooking, useCancelBooking, useRefundBooking } from "@/hooks/useBookings";
+import { useUnreadBookings } from "@/hooks/useUnreadBookings";
 import type { BookingStop } from "@/lib/api/types";
 
 export const Route = createFileRoute("/bookings/$id")({
@@ -29,6 +30,13 @@ const STEPS = ["DRAFT", "CONFIRMED", "DRIVER_ASSIGNED", "PICKED_UP", "IN_TRANSIT
 function BookingDetail() {
   const { id } = useParams({ from: "/bookings/$id" });
   const { data: b, isLoading, error } = useBooking(id);
+  const { markAsSeen } = useUnreadBookings();
+
+  useEffect(() => {
+    if (id) {
+      markAsSeen(id);
+    }
+  }, [id, markAsSeen]);
 
   const cancelMut = useCancelBooking();
   const refundMut = useRefundBooking();

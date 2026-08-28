@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
+import { useUnreadBookings } from "@/hooks/useUnreadBookings";
 
 const sections = [
   {
@@ -101,6 +102,7 @@ export function AppSidebar() {
     refetchInterval: 30000,
   });
   const pendingCount = pendingData?.data?.count || 0;
+  const { unreadCount: unreadBookingsCount } = useUnreadBookings();
 
   const initials = admin?.name
     ? admin.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -145,9 +147,16 @@ export function AppSidebar() {
                             {pendingCount}
                           </div>
                         )}
-                        {isActive(item.url) && item.url !== "/workforce/verification" && (
-                          <ChevronRight className="ml-auto h-3.5 w-3.5 opacity-60" />
+                        {item.url === "/bookings" && unreadBookingsCount > 0 && (
+                          <div className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white group-data-[collapsible=icon]:hidden animate-in fade-in zoom-in-75">
+                            {unreadBookingsCount > 99 ? "99+" : unreadBookingsCount}
+                          </div>
                         )}
+                        {isActive(item.url) &&
+                          !(item.url === "/workforce/verification" && pendingCount > 0) &&
+                          !(item.url === "/bookings" && unreadBookingsCount > 0) && (
+                            <ChevronRight className="ml-auto h-3.5 w-3.5 opacity-60" />
+                          )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

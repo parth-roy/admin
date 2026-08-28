@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
-import { Download, Filter, Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Download, Filter, Search, ChevronLeft, ChevronRight, Loader2, CheckCheck } from "lucide-react";
 import { PageHeader } from "@/components/admin/AdminTopbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { useBookings } from "@/hooks/useBookings";
+import { useUnreadBookings } from "@/hooks/useUnreadBookings";
 import { bookingsApi } from "@/lib/api/bookings.api";
 import type { BookingStatus, VehicleType, PaymentStatus, BookingListItem } from "@/lib/api/types";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -31,6 +32,8 @@ function BookingsPage() {
   const [vehicleType, setVehicleType] = useState<string>("all-vt");
   const [paymentStatus, setPaymentStatus] = useState<string>("all-pay");
   const debouncedSearch = useDebounce(search, 400);
+
+  const { isBookingUnread, markAsSeen, markAllAsSeen, unreadCount } = useUnreadBookings();
 
   const { data, isLoading, isFetching } = useBookings({
     page,
@@ -59,9 +62,22 @@ function BookingsPage() {
         title="All Bookings"
         description={total ? `${total.toLocaleString("en-IN")} bookings across all statuses` : "Loading…"}
         actions={
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-1" />Export CSV
-          </Button>
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={markAllAsSeen}
+                className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <CheckCheck className="h-3.5 w-3.5 text-emerald-500" />
+                Mark all as read ({unreadCount})
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <Download className="h-4 w-4 mr-1" />Export CSV
+            </Button>
+          </div>
         }
       />
 
@@ -145,34 +161,54 @@ function BookingsPage() {
                     </TableRow>
                   ))
                 ) : data?.data?.length ? (
-                  data.data.map((b: BookingListItem) => (
-                    <TableRow key={b.id} className="hover:bg-muted/40">
-                      <TableCell><Checkbox /></TableCell>
-                      <TableCell>
-                        <Link to="/bookings/$id" params={{ id: b.id }} className="font-mono text-xs text-info hover:underline">
-                          {b.bookingNumber}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm font-medium">{b.customer?.name ?? "—"}</div>
-                        <div className="text-xs text-muted-foreground">{b.customer?.phone}</div>
-                      </TableCell>
-                      <TableCell><StatusBadge status={b.status} /></TableCell>
-                      <TableCell className="text-xs">{b.vehicleType?.replace(/_/g, " ")}</TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
-                        ₹{Number(b.totalFare ?? 0).toLocaleString("en-IN")}
-                      </TableCell>
-                      <TableCell><StatusBadge status={b.paymentStatus} /></TableCell>
-                      <TableCell className="text-sm">
-                        {b.driver?.user?.name ?? (
-                          <span className="text-warning-foreground bg-warning/20 rounded px-2 py-0.5 text-xs">Unassigned</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {fmtDate(b.createdAt)}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  data.data.map((b: BookingListItem) => {
+                    const isUnread = isBookingUnread(b.id);
+                    return (
+                      <TableRow
+                        key={b.id}
+                        className={`hover:bg-muted/40 transition-colors ${
+                          isUnread ? "bg-red-500/[0.03] dark:bg-red-500/[0.06]" : ""
+                        }`}
+                      >
+                        <TableCell><Checkbox /></TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Link
+                              to="/bookings/$id"
+                              params={{ id: b.id }}
+                              onClick={() => markAsSeen(b.id)}
+                              className="font-mono text-xs text-info hover:underline font-semibold"
+                            >
+                              {b.bookingNumber}
+                            </Link>
+                            {isUnread && (
+                              <span className="inline-flex items-center rounded-full bg-red-500/10 px-1.5 py-0.5 text-[9px] font-bold text-red-500 border border-red-500/20 uppercase tracking-wider animate-pulse">
+                                NEW
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm font-medium">{b.customer?.name ?? "—"}</div>
+                          <div className="text-xs text-muted-foreground">{b.customer?.phone}</div>
+                        </TableCell>
+                        <TableCell><StatusBadge status={b.status} /></TableCell>
+                        <TableCell className="text-xs">{b.vehicleType?.replace(/_/g, " ")}</TableCell>
+                        <TableCell className="text-right font-mono tabular-nums">
+                          ₹{Number(b.totalFare ?? 0).toLocaleString("en-IN")}
+                        </TableCell>
+                        <TableCell><StatusBadge status={b.paymentStatus} /></TableCell>
+                        <TableCell className="text-sm">
+                          {b.driver?.user?.name ?? (
+                            <span className="text-warning-foreground bg-warning/20 rounded px-2 py-0.5 text-xs">Unassigned</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {fmtDate(b.createdAt)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={9} className="py-12 text-center text-muted-foreground">
