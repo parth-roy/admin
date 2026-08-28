@@ -17,6 +17,21 @@ export const fleetApi = {
     return res.data.data;
   },
 
+  walletCredit: async (id: string, amount: number, note: string): Promise<{ credited: number; newBalance: number }> => {
+    const res = await apiClient.post<ApiResponse<{ credited: number; newBalance: number }>>(`/admin/fleet-owners/${id}/wallet-credit`, { amount, note });
+    return res.data.data;
+  },
+
+  softDelete: async (id: string, reason: string): Promise<{ deleted: boolean }> => {
+    const res = await apiClient.delete<ApiResponse<{ deleted: boolean }>>(`/admin/fleet-owners/${id}/soft`, { data: { reason } });
+    return res.data.data;
+  },
+
+  hardDelete: async (id: string, reason: string): Promise<{ deleted: boolean; permanent: boolean }> => {
+    const res = await apiClient.delete<ApiResponse<{ deleted: boolean; permanent: boolean }>>(`/admin/fleet-owners/${id}/hard`, { data: { reason } });
+    return res.data.data;
+  },
+
   listTrucks: async (params: FleetParams = {}): Promise<Paginated<FleetTruck>> => {
     const res = await apiClient.get<ApiResponse<Paginated<FleetTruck>>>('/admin/fleet-trucks', { params });
     return res.data.data;
@@ -27,3 +42,4 @@ export const fleetApi = {
     return res.data.data;
   },
 };
+

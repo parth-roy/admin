@@ -67,3 +67,46 @@ export function useSetDocVerified() {
     },
   });
 }
+
+export function useBlockDriver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      driversApi.block(id, isActive),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+    },
+  });
+}
+
+export function useOverrideDriverStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'OFFLINE' | 'AVAILABLE' | 'BREAK' }) =>
+      driversApi.overrideStatus(id, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+    },
+  });
+}
+
+export function useSoftDeleteDriver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => driversApi.softDelete(id, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+    },
+  });
+}
+
+export function useHardDeleteDriver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => driversApi.hardDelete(id, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+    },
+  });
+}
+

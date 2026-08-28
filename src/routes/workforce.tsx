@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, ChevronLeft, ChevronRight, Loader2, Edit, CheckCircle, XCircle, Eye, FileImage, ShieldAlert, Ban } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Loader2, Edit, CheckCircle, XCircle, Eye, FileImage, ShieldAlert, Ban, Trash2, X } from "lucide-react";
 import { PageHeader } from "@/components/admin/AdminTopbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +17,11 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { useWorkforce, useUpdateWorkerBank, useCreditWorkerWallet, useWorker, useSuspendWorker, useRevokeWorkerVerification } from "@/hooks/useWorkforce";
+import { useWorkforce, useUpdateWorkerBank, useCreditWorkerWallet, useWorker, useSuspendWorker, useRevokeWorkerVerification, useSoftDeleteWorker, useHardDeleteWorker } from "@/hooks/useWorkforce";
 import { useDebounce } from "@/hooks/useDebounce";
 import { toast } from "sonner";
 import { Wallet } from "lucide-react";
+import { DeleteConfirmDialog } from "@/components/admin/DeleteConfirmDialog";
 
 export const Route = createFileRoute("/workforce")({
   component: WorkforceList,
@@ -31,10 +32,15 @@ function WorkforceList() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [status, setStatus] = useState<string>("all");
-  
+  const [skillFilter, setSkillFilter] = useState<string>("all");
+
   const [editingWorker, setEditingWorker] = useState<any>(null);
   const [creditingWorker, setCreditingWorker] = useState<any>(null);
   const [viewingWorkerId, setViewingWorkerId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+
+  const softDeleteMut = useSoftDeleteWorker();
+  const hardDeleteMut = useHardDeleteWorker();
 
   const { data, isLoading } = useWorkforce({
     page,
@@ -42,6 +48,7 @@ function WorkforceList() {
     search: debouncedSearch,
     status: status !== "all" ? status : undefined,
   });
+
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -175,6 +182,14 @@ function WorkforceList() {
                         >
                           <Wallet className="h-4 w-4" /> Credit Wallet
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setDeleteTarget(worker)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -232,9 +247,30 @@ function WorkforceList() {
           onOpenChange={(open) => !open && setViewingWorkerId(null)}
         />
       )}
+
+      {deleteTarget && (
+        <DeleteConfirmDialog
+          open={!!deleteTarget}
+          onOpenChange={() => setDeleteTarget(null)}
+          entityLabel="Worker"
+          entityName={deleteTarget.user?.name ?? deleteTarget.user?.phone ?? "Worker"}
+          softDeleteLabel="Deactivate Worker"
+          onSoftDelete={async (reason) => {
+            await softDeleteMut.mutateAsync({ id: deleteTarget.id, reason });
+            toast.success("Worker deactivated");
+            setDeleteTarget(null);
+          }}
+          onHardDelete={async (reason) => {
+            await hardDeleteMut.mutateAsync({ id: deleteTarget.id, reason });
+            toast.success("Worker permanently deleted");
+            setDeleteTarget(null);
+          }}
+        />
+      )}
     </div>
   );
 }
+
 
 function CreditWalletDialog({ worker, open, onOpenChange }: { worker: any, open: boolean, onOpenChange: (open: boolean) => void }) {
   const [amount, setAmount] = useState<string>("");

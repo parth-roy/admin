@@ -80,3 +80,30 @@ export function useRevokeWorkerVerification() {
     },
   });
 }
+
+export function useSoftDeleteWorker() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      const res = await api.delete(`/admin/workforce/${id}/soft`, { data: { reason } });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workforce"] });
+    },
+  });
+}
+
+export function useHardDeleteWorker() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      const res = await api.delete(`/admin/workforce/${id}/hard`, { data: { reason } });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workforce"] });
+    },
+  });
+}
+

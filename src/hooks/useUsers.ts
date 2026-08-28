@@ -53,3 +53,24 @@ export function useAdminWalletCredit() {
     },
   });
 }
+
+export function useSoftDeleteUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => usersApi.softDelete(id, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: USER_KEYS.all });
+    },
+  });
+}
+
+export function useHardDeleteUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => usersApi.hardDelete(id, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: USER_KEYS.all });
+    },
+  });
+}
+

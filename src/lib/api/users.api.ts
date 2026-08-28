@@ -26,4 +26,15 @@ export const usersApi = {
     const res = await apiClient.post<ApiResponse<{ credited: number; newBalance: number }>>(`/admin/users/${id}/wallet-credit`, { amount, note });
     return res.data.data;
   },
+
+  softDelete: async (id: string, reason: string): Promise<{ deleted: boolean }> => {
+    const res = await apiClient.delete<ApiResponse<{ deleted: boolean }>>(`/admin/users/${id}/soft`, { data: { reason } });
+    return res.data.data;
+  },
+
+  hardDelete: async (id: string, reason: string): Promise<{ deleted: boolean; permanent: boolean }> => {
+    const res = await apiClient.delete<ApiResponse<{ deleted: boolean; permanent: boolean }>>(`/admin/users/${id}/hard`, { data: { reason } });
+    return res.data.data;
+  },
 };
+
