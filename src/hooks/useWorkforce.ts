@@ -1,15 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient as api } from "@/lib/api/client";
 
-export function useWorkforce(params: { page: number; limit: number; search?: string; status?: string }) {
+export interface WorkforceParams {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: string;
+  isDocVerified?: boolean;
+  bankVerified?: boolean;
+  isActive?: boolean;
+}
+
+export function useWorkforce(params: WorkforceParams) {
   return useQuery({
     queryKey: ["workforce", params],
     queryFn: async () => {
       const res = await api.get("/admin/workforce", { params });
       return res.data.data;
     },
+    staleTime: 30_000,
+    placeholderData: (prev) => prev,
   });
 }
+
 
 export function useWorker(id: string) {
   return useQuery({
