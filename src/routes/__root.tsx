@@ -12,6 +12,7 @@ import { AppSidebar } from "@/components/admin/AppSidebar";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/contexts/auth";
+import { AdminWorkspaceProvider } from "@/contexts/workspace";
 import { Loader2 } from "lucide-react";
 
 // ── Auth routes that bypass the sidebar shell ─────────────────────────────────
@@ -144,7 +145,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AppContent />
+        <AdminWorkspaceProvider>
+          <AppContent />
+        </AdminWorkspaceProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

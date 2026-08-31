@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Truck, Users, Globe } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAdminWorkspace } from "@/contexts/workspace";
 
 export function PageHeader({
   title,
@@ -28,6 +29,8 @@ export function PageHeader({
 }
 
 export function AdminTopbar() {
+  const { mode, config } = useAdminWorkspace();
+
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
       <SidebarTrigger />
@@ -39,6 +42,21 @@ export function AdminTopbar() {
         />
       </div>
       <div className="ml-auto flex items-center gap-2">
+        {/* Workspace Division Indicator */}
+        <Badge
+          variant="outline"
+          className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-muted/40"
+        >
+          {mode === "gomytruck" ? (
+            <Truck className="h-3.5 w-3.5 text-emerald-500" />
+          ) : mode === "metromitra" ? (
+            <Users className="h-3.5 w-3.5 text-violet-500" />
+          ) : (
+            <Globe className="h-3.5 w-3.5 text-amber-500" />
+          )}
+          <span>{config.title}</span>
+        </Badge>
+
         <Badge variant="outline" className="hidden md:inline-flex gap-1.5 border-success/30 text-success">
           <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
           Live
