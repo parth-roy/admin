@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, AlertTriangle, CheckCircle } from 'lucide-react';
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoicGFydGhyb3k0ODAiLCJhIjoi' + 'Y21wZ3ZjdTJzMDB6ZzJwc2R0MW0zajZwayJ9' + '.EeQV2fucMtGp-bM8tuf-dg';
-mapboxgl.accessToken = MAPBOX_TOKEN;
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN as string;
 
 // Helper component to render a single standalone map
 function SingleMap({ lat, lng, color, popupText }: { lat: number, lng: number, color: string, popupText: string }) {

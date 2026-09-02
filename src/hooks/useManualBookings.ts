@@ -6,6 +6,7 @@ export const MANUAL_BOOKING_KEYS = {
   all: ["manual-bookings"] as const,
   list: (params: ManualBookingsParams) => ["manual-bookings", "list", params] as const,
   detail: (id: string) => ["manual-bookings", "detail", id] as const,
+  matchedDrivers: (id: string, params: any) => ["manual-bookings", "matched-drivers", id, params] as const,
 };
 
 export function useManualBookings(params: ManualBookingsParams = {}) {
@@ -23,6 +24,18 @@ export function useManualBooking(id: string) {
     queryFn: () => manualBookingsApi.getById(id),
     enabled: !!id,
     staleTime: 30_000,
+  });
+}
+
+export function useMatchedDrivers(
+  id: string | null,
+  params: { radiusKm?: number; vehicleType?: string; search?: string } = {}
+) {
+  return useQuery({
+    queryKey: MANUAL_BOOKING_KEYS.matchedDrivers(id || "", params),
+    queryFn: () => manualBookingsApi.getMatchedDrivers(id as string, params),
+    enabled: !!id,
+    staleTime: 15_000,
   });
 }
 

@@ -46,6 +46,7 @@ import { useManualBookings, useDeleteManualBooking } from "@/hooks/useManualBook
 import { manualBookingsApi, type ManualBookingRecord } from "@/lib/api/manual-bookings.api";
 import { ManualBookingFormModal } from "@/components/admin/ManualBookingFormModal";
 import { ManualBookingDetailDrawer } from "@/components/admin/ManualBookingDetailDrawer";
+import { MatchedDriversModal } from "@/components/admin/MatchedDriversModal";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export const Route = createFileRoute("/manual-bookings/")({
@@ -122,6 +123,7 @@ function ManualBookingsPage() {
   const [editingBooking, setEditingBooking] = useState<ManualBookingRecord | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<ManualBookingRecord | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [matchedDriversBooking, setMatchedDriversBooking] = useState<ManualBookingRecord | null>(null);
 
   const deleteMut = useDeleteManualBooking();
 
@@ -171,6 +173,10 @@ function ManualBookingsPage() {
   const handleOpenDetail = (record: ManualBookingRecord) => {
     setSelectedBooking(record);
     setIsDetailOpen(true);
+  };
+
+  const handleOpenMatchedDrivers = (record: ManualBookingRecord) => {
+    setMatchedDriversBooking(record);
   };
 
   const handleDelete = async (record: ManualBookingRecord) => {
@@ -532,6 +538,16 @@ function ManualBookingsPage() {
                     <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
                         <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800 flex items-center gap-1 shadow-2xs mr-0.5 transition-all cursor-pointer"
+                          title="Find Live Matched Drivers for this Load"
+                          onClick={() => handleOpenMatchedDrivers(record)}
+                        >
+                          <Truck className="h-3.5 w-3.5 text-emerald-600" />
+                          <span>Matched</span>
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-muted-foreground hover:text-foreground"
@@ -629,6 +645,13 @@ function ManualBookingsPage() {
           setEditingBooking(booking);
           setIsFormOpen(true);
         }}
+      />
+
+      {/* Live Matched Drivers Modal */}
+      <MatchedDriversModal
+        open={!!matchedDriversBooking}
+        onOpenChange={(open) => !open && setMatchedDriversBooking(null)}
+        booking={matchedDriversBooking}
       />
     </div>
   );

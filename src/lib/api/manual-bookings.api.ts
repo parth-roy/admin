@@ -105,6 +105,56 @@ export interface ManualBookingsParams {
   endDate?: string;
 }
 
+export interface MatchedDriverLead {
+  id: string;
+  leadId: string;
+  name: string;
+  phone: string;
+  city: string;
+  state: string | null;
+  transportHub: string | null;
+  vehicleType: string;
+  vehicleNumber: string;
+  distanceKm: number;
+  tier: "LOCAL" | "REGIONAL" | "CORRIDOR" | "EXTENDED";
+  isExactVehicleMatch: boolean;
+  matchScore: number;
+  notes: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface MatchedDriversResponse {
+  booking: {
+    id: string;
+    bookingNumber: string;
+    customerName?: string | null;
+    customerPhone?: string | null;
+    pickupCity?: string | null;
+    pickupAddress?: string | null;
+    dropoffCity?: string | null;
+    dropoffAddress?: string | null;
+    vehicleType?: string | null;
+    goodsType?: string | null;
+    quotedAmount?: number | null;
+    pickupDateTime?: string | null;
+    status?: string | null;
+  };
+  pickupCoords: {
+    lat: number;
+    lng: number;
+    resolvedLocationName: string;
+  };
+  summary: {
+    totalMatched: number;
+    localCount: number;
+    regionalCount: number;
+    corridorCount: number;
+    extendedCount: number;
+  };
+  drivers: MatchedDriverLead[];
+}
+
 export const manualBookingsApi = {
   list: async (params: ManualBookingsParams = {}): Promise<ManualBookingsListResponse> => {
     const res = await apiClient.get<ApiResponse<ManualBookingsListResponse>>("/admin/manual-bookings", {
@@ -115,6 +165,17 @@ export const manualBookingsApi = {
 
   getById: async (id: string): Promise<ManualBookingRecord> => {
     const res = await apiClient.get<ApiResponse<ManualBookingRecord>>(`/admin/manual-bookings/${id}`);
+    return res.data.data;
+  },
+
+  getMatchedDrivers: async (
+    id: string,
+    params: { radiusKm?: number; vehicleType?: string; search?: string } = {}
+  ): Promise<MatchedDriversResponse> => {
+    const res = await apiClient.get<ApiResponse<MatchedDriversResponse>>(
+      `/admin/manual-bookings/${id}/matched-drivers`,
+      { params }
+    );
     return res.data.data;
   },
 
