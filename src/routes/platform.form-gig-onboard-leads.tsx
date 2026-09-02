@@ -26,7 +26,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import ClusteredLeadsMap from '@/components/ClusteredLeadsMap';
 import { SearchCombobox } from '@/components/SearchCombobox';
-import { useState, useCallback, useDeferredValue } from 'react';
+import { useState, useCallback, useDeferredValue, useMemo } from 'react';
 
 export const Route = createFileRoute('/platform/form-gig-onboard-leads')({
   component: FormGigOnboardLeadsPage,
@@ -47,12 +47,6 @@ function statusClass(status: string) {
   if (status === 'APPROVED' || status === 'CONVERTED') return 'bg-emerald-500';
   if (status === 'PENDING') return 'bg-amber-500 text-white';
   return '';
-}
-function confidenceBadge(conf: string | null | undefined) {
-  if (!conf) return null;
-  if (conf === 'VERIFIED')
-    return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 text-[10px] px-1.5">✓ Verified</Badge>;
-  return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 text-[10px] px-1.5">~ Probable</Badge>;
 }
 
 const JOB_TYPES = [
@@ -76,6 +70,42 @@ function FormGigOnboardLeadsPage() {
   const [page, setPage] = useState(1);
 
   const searchTerm = useDeferredValue(searchInput);
+
+  /* ── Filter options query (distinct states, districts, cities) ── */
+  const { data: filterOptions } = useQuery({
+    queryKey: ['form-gig-leads-filter-options'],
+    queryFn: async () => {
+      const { data: res } = await api.get('/form-gig-leads/filter-options');
+      return res.data as {
+        states: string[];
+        districts: { state: string; district: string }[];
+        cities: { state: string; district: string; city: string }[];
+      };
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const uniqueStates = useMemo(() => filterOptions?.states ?? [], [filterOptions]);
+
+  const uniqueDistricts = useMemo(() => {
+    if (!filterOptions?.districts) return [];
+    const filtered = stateFilter
+      ? filterOptions.districts.filter((d) => d.state.toLowerCase() === stateFilter.toLowerCase())
+      : filterOptions.districts;
+    return [...new Set(filtered.map((d) => d.district).filter(Boolean))].sort();
+  }, [filterOptions, stateFilter]);
+
+  const uniqueCities = useMemo(() => {
+    if (!filterOptions?.cities) return [];
+    let filtered = filterOptions.cities;
+    if (stateFilter) {
+      filtered = filtered.filter((c) => c.state.toLowerCase() === stateFilter.toLowerCase());
+    }
+    if (districtFilter) {
+      filtered = filtered.filter((c) => c.district.toLowerCase() === districtFilter.toLowerCase());
+    }
+    return [...new Set(filtered.map((c) => c.city).filter(Boolean))].sort();
+  }, [filterOptions, stateFilter, districtFilter]);
 
   /* ── Server-paginated query ──────────────────────────────────── */
   const { data, isLoading, isFetching } = useQuery({
@@ -113,6 +143,7 @@ function FormGigOnboardLeadsPage() {
 
   const handleStateChange = (v: string) => applyFilter(() => { setStateFilter(v); setDistrictFilter(''); setCityFilter(''); });
   const handleDistrictChange = (v: string) => applyFilter(() => { setDistrictFilter(v); setCityFilter(''); });
+  const handleCityChange = (v: string) => applyFilter(() => setCityFilter(v));
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
@@ -162,6 +193,7 @@ function FormGigOnboardLeadsPage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+          {/* Search */}
           <div className="relative lg:col-span-2">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
             <Input
@@ -172,8 +204,9 @@ function FormGigOnboardLeadsPage() {
             />
           </div>
 
+          {/* State SearchCombobox */}
           <SearchCombobox
-            options={['West Bengal','Maharashtra','Karnataka','Tamil Nadu','Uttar Pradesh','Delhi','Gujarat','Rajasthan','Andhra Pradesh','Telangana','Kerala','Madhya Pradesh','Bihar','Punjab','Haryana','Jharkhand','Odisha','Assam','Uttarakhand','Chhattisgarh','Himachal Pradesh','Goa','Puducherry','Chandigarh'].sort()}
+            options={uniqueStates}
             value={stateFilter}
             onChange={handleStateChange}
             placeholder="All States"
@@ -181,20 +214,29 @@ function FormGigOnboardLeadsPage() {
             className="w-full"
           />
 
-          <Input
-            placeholder="District…"
-            className="h-9 text-sm border-slate-200"
+          {/* District SearchCombobox */}
+          <SearchCombobox
+            options={uniqueDistricts}
             value={districtFilter}
-            onChange={(e) => { setDistrictFilter(e.target.value); setPage(1); }}
+            onChange={handleDistrictChange}
+            placeholder="All Districts"
+            searchPlaceholder="Search district…"
+            emptyText={stateFilter ? "No districts in selected state." : "Select a state or search..."}
+            className="w-full"
           />
 
-          <Input
-            placeholder="City…"
-            className="h-9 text-sm border-slate-200"
+          {/* City SearchCombobox */}
+          <SearchCombobox
+            options={uniqueCities}
             value={cityFilter}
-            onChange={(e) => { setCityFilter(e.target.value); setPage(1); }}
+            onChange={handleCityChange}
+            placeholder="All Cities"
+            searchPlaceholder="Search city…"
+            emptyText={districtFilter || stateFilter ? "No cities in selected filter." : "Search city name..."}
+            className="w-full"
           />
 
+          {/* Job Type */}
           <SearchCombobox
             options={JOB_TYPES.map(normaliseJobType)}
             value={jobTypeFilter ? normaliseJobType(jobTypeFilter) : ''}
@@ -234,6 +276,10 @@ function FormGigOnboardLeadsPage() {
       {viewMode === 'map' ? (
         <ClusteredLeadsMap
           type="gig"
+          searchTerm={searchTerm}
+          state={stateFilter}
+          district={districtFilter}
+          city={cityFilter}
           jobType={jobTypeFilter || undefined}
           status={statusFilter || undefined}
         />

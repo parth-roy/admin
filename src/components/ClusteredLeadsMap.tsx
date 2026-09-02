@@ -9,6 +9,10 @@ const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string;
 
 interface ClusteredLeadsMapProps {
   type: 'driver' | 'gig';
+  searchTerm?: string;
+  state?: string;
+  district?: string;
+  city?: string;
   vehicleType?: string;
   jobType?: string;
   status?: string;
@@ -27,12 +31,176 @@ const MAP_STYLES = [
   { id: 'light', name: 'Light', url: 'mapbox://styles/mapbox/light-v11' },
 ];
 
+/** Indian state centroids for smooth state-level auto-zoom */
+const STATE_COORDINATES: Record<string, { lat: number; lng: number; zoom: number }> = {
+  'west bengal': { lat: 23.5, lng: 88.0, zoom: 7.2 },
+  'maharashtra': { lat: 19.5, lng: 75.5, zoom: 6.8 },
+  'karnataka': { lat: 15.0, lng: 76.0, zoom: 7.0 },
+  'tamil nadu': { lat: 11.0, lng: 78.5, zoom: 7.2 },
+  'telangana': { lat: 17.8, lng: 79.0, zoom: 7.2 },
+  'andhra pradesh': { lat: 15.9, lng: 80.0, zoom: 7.0 },
+  'delhi': { lat: 28.6139, lng: 77.2090, zoom: 11.0 },
+  'gujarat': { lat: 22.5, lng: 71.5, zoom: 7.0 },
+  'rajasthan': { lat: 26.8, lng: 73.5, zoom: 6.5 },
+  'uttar pradesh': { lat: 27.0, lng: 80.5, zoom: 6.8 },
+  'kerala': { lat: 10.5, lng: 76.5, zoom: 7.5 },
+  'madhya pradesh': { lat: 23.5, lng: 77.5, zoom: 6.8 },
+  'bihar': { lat: 25.6, lng: 85.5, zoom: 7.2 },
+  'punjab': { lat: 31.0, lng: 75.5, zoom: 7.8 },
+  'haryana': { lat: 29.0, lng: 76.5, zoom: 7.8 },
+  'jharkhand': { lat: 23.6, lng: 85.5, zoom: 7.5 },
+  'odisha': { lat: 20.5, lng: 84.5, zoom: 7.2 },
+  'assam': { lat: 26.2, lng: 92.5, zoom: 7.2 },
+  'uttarakhand': { lat: 30.1, lng: 79.2, zoom: 7.8 },
+  'chhattisgarh': { lat: 21.3, lng: 81.8, zoom: 7.0 },
+  'goa': { lat: 15.3, lng: 74.0, zoom: 10.0 },
+};
+
+/** 100+ Indian city and corridor coordinates for instant auto-zoom pinpointing */
+const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+  // West Bengal
+  'barrackpore': { lat: 22.7600, lng: 88.3700 },
+  'titagarh': { lat: 22.7400, lng: 88.3750 },
+  'sodepur': { lat: 22.6980, lng: 88.3890 },
+  'belghoria': { lat: 22.6620, lng: 88.3850 },
+  'dum dum': { lat: 22.6420, lng: 88.4310 },
+  'barasat': { lat: 22.7230, lng: 88.4800 },
+  'naihati': { lat: 22.8900, lng: 88.4250 },
+  'chinsurah': { lat: 22.9000, lng: 88.3900 },
+  'hooghly': { lat: 22.9000, lng: 88.3900 },
+  'serampore': { lat: 22.7500, lng: 88.3400 },
+  'rishra': { lat: 22.7100, lng: 88.3500 },
+  'dankuni': { lat: 22.6850, lng: 88.2950 },
+  'dhulagarh': { lat: 22.5700, lng: 88.2500 },
+  'howrah': { lat: 22.5958, lng: 88.2636 },
+  'kolkata': { lat: 22.5726, lng: 88.3639 },
+  'burrabazar': { lat: 22.5850, lng: 88.3550 },
+  'salt lake': { lat: 22.5867, lng: 88.4178 },
+  'new town': { lat: 22.5958, lng: 88.4795 },
+  'sankrail': { lat: 22.5600, lng: 88.2400 },
+  'uluberia': { lat: 22.4700, lng: 87.9800 },
+  'bagnan': { lat: 22.4670, lng: 87.9670 },
+  'haldia': { lat: 22.0667, lng: 88.0698 },
+  'kharagpur': { lat: 22.3400, lng: 87.3200 },
+  'durgapur': { lat: 23.5204, lng: 87.3119 },
+  'asansol': { lat: 23.6889, lng: 86.9661 },
+  'raniganj': { lat: 23.6210, lng: 87.1270 },
+  'kalyani': { lat: 22.9760, lng: 88.4340 },
+  'malda': { lat: 25.0085, lng: 88.1432 },
+  'siliguri': { lat: 26.7271, lng: 88.3953 },
+
+  // Maharashtra
+  'mumbai': { lat: 19.0760, lng: 72.8777 },
+  'andheri': { lat: 19.1197, lng: 72.8464 },
+  'bandra': { lat: 19.0596, lng: 72.8295 },
+  'borivali': { lat: 19.2300, lng: 72.8580 },
+  'thane': { lat: 19.2183, lng: 72.9781 },
+  'navi mumbai': { lat: 19.0330, lng: 73.0297 },
+  'vashi': { lat: 19.0771, lng: 72.9986 },
+  'panvel': { lat: 18.9894, lng: 73.1175 },
+  'bhiwandi': { lat: 19.2967, lng: 73.0631 },
+  'kalyan': { lat: 19.2403, lng: 73.1305 },
+  'pune': { lat: 18.5204, lng: 73.8567 },
+  'chakan': { lat: 18.7606, lng: 73.8587 },
+  'bhosari': { lat: 18.6298, lng: 73.8443 },
+  'nagpur': { lat: 21.1458, lng: 79.0882 },
+  'nashik': { lat: 19.9975, lng: 73.7898 },
+  'aurangabad': { lat: 19.8762, lng: 75.3433 },
+  'solapur': { lat: 17.6599, lng: 75.9064 },
+  'kolhapur': { lat: 16.7050, lng: 74.2433 },
+
+  // Karnataka
+  'bengaluru': { lat: 12.9716, lng: 77.5946 },
+  'bangalore': { lat: 12.9716, lng: 77.5946 },
+  'peenya': { lat: 13.0289, lng: 77.5174 },
+  'whitefield': { lat: 12.9799, lng: 77.7480 },
+  'electronic city': { lat: 12.8399, lng: 77.6770 },
+  'hoskote': { lat: 13.0712, lng: 77.8007 },
+  'nelamangala': { lat: 13.0984, lng: 77.3934 },
+  'tumakuru': { lat: 13.3379, lng: 77.1173 },
+  'mysuru': { lat: 12.2958, lng: 76.6394 },
+
+  // Tamil Nadu
+  'chennai': { lat: 13.0827, lng: 80.2707 },
+  'sriperumbudur': { lat: 12.9699, lng: 79.9400 },
+  'oragadam': { lat: 12.8333, lng: 79.9333 },
+  'ambattur': { lat: 13.1143, lng: 80.1548 },
+  'hosur': { lat: 12.7409, lng: 77.8253 },
+  'coimbatore': { lat: 11.0168, lng: 76.9558 },
+  'tiruppur': { lat: 11.1085, lng: 77.3411 },
+  'madurai': { lat: 9.9252, lng: 78.1198 },
+
+  // Telangana & Andhra Pradesh
+  'hyderabad': { lat: 17.3850, lng: 78.4867 },
+  'jeedimetla': { lat: 17.5180, lng: 78.4380 },
+  'kukatpally': { lat: 17.4947, lng: 78.3996 },
+  'madhapur': { lat: 17.4483, lng: 78.3742 },
+  'gachibowli': { lat: 17.4401, lng: 78.3489 },
+  'shamshabad': { lat: 17.2403, lng: 78.4294 },
+  'medchal': { lat: 17.6297, lng: 78.4814 },
+  'patancheru': { lat: 17.5284, lng: 78.2660 },
+  'secunderabad': { lat: 17.4399, lng: 78.4983 },
+  'visakhapatnam': { lat: 17.6868, lng: 83.2185 },
+  'vijayawada': { lat: 16.5062, lng: 80.6480 },
+  'guntur': { lat: 16.3067, lng: 80.4365 },
+
+  // Delhi NCR & North
+  'delhi': { lat: 28.6139, lng: 77.2090 },
+  'new delhi': { lat: 28.6139, lng: 77.2090 },
+  'gurgaon': { lat: 28.4595, lng: 77.0266 },
+  'gurugram': { lat: 28.4595, lng: 77.0266 },
+  'noida': { lat: 28.5355, lng: 77.3910 },
+  'greater noida': { lat: 28.4744, lng: 77.5040 },
+  'ghaziabad': { lat: 28.6692, lng: 77.4538 },
+  'faridabad': { lat: 28.4089, lng: 77.3178 },
+  'chandigarh': { lat: 30.7333, lng: 76.7794 },
+  'ludhiana': { lat: 30.9010, lng: 75.8573 },
+  'amritsar': { lat: 31.6340, lng: 74.8723 },
+  'jaipur': { lat: 26.9124, lng: 75.7873 },
+  'lucknow': { lat: 26.8467, lng: 80.9462 },
+  'kanpur': { lat: 26.4499, lng: 80.3319 },
+  'varanasi': { lat: 25.3176, lng: 82.9739 },
+  'agra': { lat: 27.1767, lng: 78.0081 },
+
+  // Gujarat
+  'ahmedabad': { lat: 23.0225, lng: 72.5714 },
+  'surat': { lat: 21.1702, lng: 72.8311 },
+  'vadodara': { lat: 22.3072, lng: 73.1812 },
+  'rajkot': { lat: 22.3039, lng: 70.8022 },
+
+  // Central & East
+  'bhopal': { lat: 23.2599, lng: 77.4126 },
+  'indore': { lat: 22.7196, lng: 75.8577 },
+  'patna': { lat: 25.5941, lng: 85.1376 },
+  'ranchi': { lat: 23.3441, lng: 85.3096 },
+  'jamshedpur': { lat: 22.8046, lng: 86.2029 },
+  'bhubaneswar': { lat: 20.2961, lng: 85.8245 },
+  'cuttack': { lat: 20.4625, lng: 85.8828 },
+  'raipur': { lat: 21.2514, lng: 81.6296 },
+  'guwahati': { lat: 26.1445, lng: 91.7362 },
+};
+
+function resolveCoords(str?: string): { lat: number; lng: number } | null {
+  if (!str) return null;
+  const q = str.toLowerCase().trim();
+  if (CITY_COORDINATES[q]) return CITY_COORDINATES[q];
+  for (const [k, v] of Object.entries(CITY_COORDINATES)) {
+    if (q.includes(k) || k.includes(q)) return v;
+  }
+  return null;
+}
+
 /**
  * ClusteredLeadsMap — WebGL Cluster Map with full color Streets styling,
- * prominent place names, highway & district labels, and viewport streaming.
+ * prominent place names, highway & district labels, viewport streaming,
+ * and smart auto-zoom pinpointing on search / city selection.
  */
 export default function ClusteredLeadsMap({
   type,
+  searchTerm,
+  state,
+  district,
+  city,
   vehicleType,
   jobType,
   status,
@@ -65,6 +233,10 @@ export default function ClusteredLeadsMap({
         neLat: ne.lat.toFixed(6),
         neLng: ne.lng.toFixed(6),
       };
+      if (searchTerm?.trim()) params.search = searchTerm.trim();
+      if (state) params.state = state;
+      if (district) params.district = district;
+      if (city) params.city = city;
       if (vehicleType && vehicleType !== 'ALL') params.vehicleType = vehicleType;
       if (jobType && jobType !== 'ALL') params.jobType = jobType;
       if (status && status !== 'ALL') params.status = status;
@@ -93,7 +265,7 @@ export default function ClusteredLeadsMap({
     } catch {
       // Ignore viewport fetch errors gracefully
     }
-  }, [endpoint, vehicleType, jobType, status]);
+  }, [endpoint, searchTerm, state, district, city, vehicleType, jobType, status]);
 
   /** Debounced trigger for map move/zoom end */
   const scheduleFetch = useCallback(() => {
@@ -315,6 +487,72 @@ export default function ClusteredLeadsMap({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Auto-Zoom & Pinpoint Engine
+   * Smoothly navigates to the city, district, state, or search location whenever changed.
+   */
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded()) return;
+
+    // 1. Direct city selection or search match for city
+    const targetCity = city || resolveCoords(searchTerm) ? (city || searchTerm) : null;
+    const cityCoords = resolveCoords(targetCity || undefined);
+
+    if (cityCoords) {
+      map.current.flyTo({
+        center: [cityCoords.lng, cityCoords.lat],
+        zoom: 12.5,
+        essential: true,
+        duration: 1200,
+      });
+      scheduleFetch();
+      return;
+    }
+
+    // 2. District selection
+    if (district) {
+      const districtCoords = resolveCoords(district);
+      if (districtCoords) {
+        map.current.flyTo({
+          center: [districtCoords.lng, districtCoords.lat],
+          zoom: 11.5,
+          essential: true,
+          duration: 1200,
+        });
+        scheduleFetch();
+        return;
+      }
+    }
+
+    // 3. State selection
+    if (state) {
+      const stateKey = state.toLowerCase().trim();
+      const stateMeta = STATE_COORDINATES[stateKey];
+      if (stateMeta) {
+        map.current.flyTo({
+          center: [stateMeta.lng, stateMeta.lat],
+          zoom: stateMeta.zoom,
+          essential: true,
+          duration: 1200,
+        });
+        scheduleFetch();
+        return;
+      }
+    }
+
+    // 4. If all filters cleared, zoom back to India overview
+    if (!searchTerm && !city && !district && !state) {
+      map.current.flyTo({
+        center: [80.0, 22.0],
+        zoom: 4.8,
+        essential: true,
+        duration: 1000,
+      });
+    }
+
+    scheduleFetch();
+  }, [searchTerm, city, district, state, vehicleType, jobType, status, scheduleFetch]);
+
   /** Style Switch Handler */
   const handleSwitchStyle = (url: string) => {
     setCurrentStyle(url);
@@ -323,12 +561,6 @@ export default function ClusteredLeadsMap({
       map.current.setStyle(url);
     }
   };
-
-  /** Re-fetch when filters change */
-  useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded()) return;
-    scheduleFetch();
-  }, [vehicleType, jobType, status, scheduleFetch]);
 
   return (
     <div className="relative h-[620px] w-full rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
