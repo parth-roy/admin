@@ -29,6 +29,7 @@ import {
   GraduationCap,
   ChevronsUpDown,
   Check,
+  CheckCircle2,
   Shield,
   Layers,
 } from "lucide-react";
@@ -131,6 +132,7 @@ const sections: MenuSection[] = [
       { title: "Gamification", url: "/platform/gamification", icon: ShieldCheck, domain: "gomytruck" },
       { title: "Training", url: "/platform/training", icon: GraduationCap, domain: "all" },
       { title: "Form Gig Onboard Leads", url: "/platform/form-gig-onboard-leads", icon: ClipboardList, domain: "metromitra" },
+      { title: "Direct Contact Approvals", url: "/platform/direct-contact-approvals", icon: CheckCircle2, domain: "metromitra" },
       { title: "Form Driver Leads", url: "/platform/form-driver-leads", icon: ClipboardList, domain: "gomytruck" },
     ],
   },

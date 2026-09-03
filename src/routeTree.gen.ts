@@ -35,6 +35,7 @@ import { Route as PlatformLeadsRouteImport } from './routes/platform.leads'
 import { Route as PlatformGamificationRouteImport } from './routes/platform.gamification'
 import { Route as PlatformFormGigOnboardLeadsRouteImport } from './routes/platform.form-gig-onboard-leads'
 import { Route as PlatformFormDriverLeadsRouteImport } from './routes/platform.form-driver-leads'
+import { Route as PlatformDirectContactApprovalsRouteImport } from './routes/platform.direct-contact-approvals'
 import { Route as PlatformAnnouncementsRouteImport } from './routes/platform.announcements'
 import { Route as FleetTrucksRouteImport } from './routes/fleet.trucks'
 import { Route as FleetOwnersRouteImport } from './routes/fleet.owners'
@@ -183,6 +184,12 @@ const PlatformFormDriverLeadsRoute = PlatformFormDriverLeadsRouteImport.update({
   path: '/platform/form-driver-leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformDirectContactApprovalsRoute =
+  PlatformDirectContactApprovalsRouteImport.update({
+    id: '/platform/direct-contact-approvals',
+    path: '/platform/direct-contact-approvals',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PlatformAnnouncementsRoute = PlatformAnnouncementsRouteImport.update({
   id: '/platform/announcements',
   path: '/platform/announcements',
@@ -288,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/fleet/owners': typeof FleetOwnersRoute
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
+  '/platform/direct-contact-approvals': typeof PlatformDirectContactApprovalsRoute
   '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRoute
   '/platform/form-gig-onboard-leads': typeof PlatformFormGigOnboardLeadsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
@@ -331,6 +339,7 @@ export interface FileRoutesByTo {
   '/fleet/owners': typeof FleetOwnersRoute
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
+  '/platform/direct-contact-approvals': typeof PlatformDirectContactApprovalsRoute
   '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRoute
   '/platform/form-gig-onboard-leads': typeof PlatformFormGigOnboardLeadsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
@@ -375,6 +384,7 @@ export interface FileRoutesById {
   '/fleet/owners': typeof FleetOwnersRoute
   '/fleet/trucks': typeof FleetTrucksRoute
   '/platform/announcements': typeof PlatformAnnouncementsRoute
+  '/platform/direct-contact-approvals': typeof PlatformDirectContactApprovalsRoute
   '/platform/form-driver-leads': typeof PlatformFormDriverLeadsRoute
   '/platform/form-gig-onboard-leads': typeof PlatformFormGigOnboardLeadsRoute
   '/platform/gamification': typeof PlatformGamificationRoute
@@ -420,6 +430,7 @@ export interface FileRouteTypes {
     | '/fleet/owners'
     | '/fleet/trucks'
     | '/platform/announcements'
+    | '/platform/direct-contact-approvals'
     | '/platform/form-driver-leads'
     | '/platform/form-gig-onboard-leads'
     | '/platform/gamification'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/fleet/owners'
     | '/fleet/trucks'
     | '/platform/announcements'
+    | '/platform/direct-contact-approvals'
     | '/platform/form-driver-leads'
     | '/platform/form-gig-onboard-leads'
     | '/platform/gamification'
@@ -506,6 +518,7 @@ export interface FileRouteTypes {
     | '/fleet/owners'
     | '/fleet/trucks'
     | '/platform/announcements'
+    | '/platform/direct-contact-approvals'
     | '/platform/form-driver-leads'
     | '/platform/form-gig-onboard-leads'
     | '/platform/gamification'
@@ -548,6 +561,7 @@ export interface RootRouteChildren {
   FleetOwnersRoute: typeof FleetOwnersRoute
   FleetTrucksRoute: typeof FleetTrucksRoute
   PlatformAnnouncementsRoute: typeof PlatformAnnouncementsRoute
+  PlatformDirectContactApprovalsRoute: typeof PlatformDirectContactApprovalsRoute
   PlatformFormDriverLeadsRoute: typeof PlatformFormDriverLeadsRoute
   PlatformFormGigOnboardLeadsRoute: typeof PlatformFormGigOnboardLeadsRoute
   PlatformGamificationRoute: typeof PlatformGamificationRoute
@@ -749,6 +763,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformFormDriverLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/direct-contact-approvals': {
+      id: '/platform/direct-contact-approvals'
+      path: '/platform/direct-contact-approvals'
+      fullPath: '/platform/direct-contact-approvals'
+      preLoaderRoute: typeof PlatformDirectContactApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform/announcements': {
       id: '/platform/announcements'
       path: '/platform/announcements'
@@ -896,6 +917,7 @@ const rootRouteChildren: RootRouteChildren = {
   FleetOwnersRoute: FleetOwnersRoute,
   FleetTrucksRoute: FleetTrucksRoute,
   PlatformAnnouncementsRoute: PlatformAnnouncementsRoute,
+  PlatformDirectContactApprovalsRoute: PlatformDirectContactApprovalsRoute,
   PlatformFormDriverLeadsRoute: PlatformFormDriverLeadsRoute,
   PlatformFormGigOnboardLeadsRoute: PlatformFormGigOnboardLeadsRoute,
   PlatformGamificationRoute: PlatformGamificationRoute,
