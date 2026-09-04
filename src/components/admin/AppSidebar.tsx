@@ -32,6 +32,7 @@ import {
   CheckCircle2,
   Shield,
   Layers,
+  CreditCard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -110,6 +111,7 @@ const sections: MenuSection[] = [
     label: "Finance & Accounts",
     items: [
       { title: "Revenue", url: "/finance/revenue", icon: BadgeIndianRupee, domain: "gomytruck" },
+      { title: "Gateway Transactions", url: "/finance/transactions", icon: CreditCard, domain: "all" },
       { title: "Earnings & Payouts", url: "/finance/earnings", icon: Wallet, domain: "all" },
       { title: "Subscriptions", url: "/finance/subscriptions", icon: Receipt, domain: "gomytruck" },
       { title: "Wallets", url: "/finance/wallets", icon: Boxes, domain: "all" },

@@ -42,6 +42,7 @@ import { Route as FleetOwnersRouteImport } from './routes/fleet.owners'
 import { Route as FleetComplianceRouteImport } from './routes/fleet.compliance'
 import { Route as FinanceWithdrawalsRouteImport } from './routes/finance.withdrawals'
 import { Route as FinanceWalletsRouteImport } from './routes/finance.wallets'
+import { Route as FinanceTransactionsRouteImport } from './routes/finance.transactions'
 import { Route as FinanceSubscriptionsRouteImport } from './routes/finance.subscriptions'
 import { Route as FinanceRevenueRouteImport } from './routes/finance.revenue'
 import { Route as FinanceRefundsRouteImport } from './routes/finance.refunds'
@@ -220,6 +221,11 @@ const FinanceWalletsRoute = FinanceWalletsRouteImport.update({
   path: '/finance/wallets',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FinanceTransactionsRoute = FinanceTransactionsRouteImport.update({
+  id: '/finance/transactions',
+  path: '/finance/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FinanceSubscriptionsRoute = FinanceSubscriptionsRouteImport.update({
   id: '/finance/subscriptions',
   path: '/finance/subscriptions',
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/finance/refunds': typeof FinanceRefundsRoute
   '/finance/revenue': typeof FinanceRevenueRoute
   '/finance/subscriptions': typeof FinanceSubscriptionsRoute
+  '/finance/transactions': typeof FinanceTransactionsRoute
   '/finance/wallets': typeof FinanceWalletsRoute
   '/finance/withdrawals': typeof FinanceWithdrawalsRoute
   '/fleet/compliance': typeof FleetComplianceRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/finance/refunds': typeof FinanceRefundsRoute
   '/finance/revenue': typeof FinanceRevenueRoute
   '/finance/subscriptions': typeof FinanceSubscriptionsRoute
+  '/finance/transactions': typeof FinanceTransactionsRoute
   '/finance/wallets': typeof FinanceWalletsRoute
   '/finance/withdrawals': typeof FinanceWithdrawalsRoute
   '/fleet/compliance': typeof FleetComplianceRoute
@@ -378,6 +386,7 @@ export interface FileRoutesById {
   '/finance/refunds': typeof FinanceRefundsRoute
   '/finance/revenue': typeof FinanceRevenueRoute
   '/finance/subscriptions': typeof FinanceSubscriptionsRoute
+  '/finance/transactions': typeof FinanceTransactionsRoute
   '/finance/wallets': typeof FinanceWalletsRoute
   '/finance/withdrawals': typeof FinanceWithdrawalsRoute
   '/fleet/compliance': typeof FleetComplianceRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/finance/refunds'
     | '/finance/revenue'
     | '/finance/subscriptions'
+    | '/finance/transactions'
     | '/finance/wallets'
     | '/finance/withdrawals'
     | '/fleet/compliance'
@@ -468,6 +478,7 @@ export interface FileRouteTypes {
     | '/finance/refunds'
     | '/finance/revenue'
     | '/finance/subscriptions'
+    | '/finance/transactions'
     | '/finance/wallets'
     | '/finance/withdrawals'
     | '/fleet/compliance'
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | '/finance/refunds'
     | '/finance/revenue'
     | '/finance/subscriptions'
+    | '/finance/transactions'
     | '/finance/wallets'
     | '/finance/withdrawals'
     | '/fleet/compliance'
@@ -555,6 +567,7 @@ export interface RootRouteChildren {
   FinanceRefundsRoute: typeof FinanceRefundsRoute
   FinanceRevenueRoute: typeof FinanceRevenueRoute
   FinanceSubscriptionsRoute: typeof FinanceSubscriptionsRoute
+  FinanceTransactionsRoute: typeof FinanceTransactionsRoute
   FinanceWalletsRoute: typeof FinanceWalletsRoute
   FinanceWithdrawalsRoute: typeof FinanceWithdrawalsRoute
   FleetComplianceRoute: typeof FleetComplianceRoute
@@ -812,6 +825,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinanceWalletsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/finance/transactions': {
+      id: '/finance/transactions'
+      path: '/finance/transactions'
+      fullPath: '/finance/transactions'
+      preLoaderRoute: typeof FinanceTransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/finance/subscriptions': {
       id: '/finance/subscriptions'
       path: '/finance/subscriptions'
@@ -911,6 +931,7 @@ const rootRouteChildren: RootRouteChildren = {
   FinanceRefundsRoute: FinanceRefundsRoute,
   FinanceRevenueRoute: FinanceRevenueRoute,
   FinanceSubscriptionsRoute: FinanceSubscriptionsRoute,
+  FinanceTransactionsRoute: FinanceTransactionsRoute,
   FinanceWalletsRoute: FinanceWalletsRoute,
   FinanceWithdrawalsRoute: FinanceWithdrawalsRoute,
   FleetComplianceRoute: FleetComplianceRoute,
