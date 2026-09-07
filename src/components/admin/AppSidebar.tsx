@@ -159,8 +159,12 @@ export function AppSidebar() {
   const { admin, logout } = useAuth();
   const { mode, setMode, config } = useAdminWorkspace();
 
-  const isActive = (url: string) =>
-    url === "/" ? pathname === "/" : pathname.startsWith(url);
+  const isActive = (url: string) => {
+    if (url === "/") return pathname === "/";
+    // Exact-prefix but must be followed by end-of-string or "/" to avoid
+    // /workforce matching /workforce/verification
+    return pathname === url || pathname.startsWith(url + "/");
+  };
 
   const { data: pendingData } = useQuery({
     queryKey: ["pendingWorkerDocumentsCount"],
