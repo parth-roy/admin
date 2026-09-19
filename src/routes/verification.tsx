@@ -107,6 +107,31 @@ const DOCUMENT_CHECKLIST: DocTypeConfig[] = [
   },
 ];
 
+function findDriverDoc(rawDocs: DriverDocument[], item: DocTypeConfig): DriverDocument | undefined {
+  const matchTypes = [item.key, ...(item.aliases || [])].map((t) => t.toUpperCase());
+  return rawDocs.find((doc) => {
+    if (!doc.type) return false;
+    const docTypeUpper = doc.type.toUpperCase();
+    return matchTypes.includes(docTypeUpper);
+  });
+}
+
+function getAdditionalDriverDocs(rawDocs: DriverDocument[]): DriverDocument[] {
+  const allKnownTypes = new Set<string>();
+  for (const item of DOCUMENT_CHECKLIST) {
+    allKnownTypes.add(item.key.toUpperCase());
+    if (item.aliases) {
+      for (const alias of item.aliases) {
+        allKnownTypes.add(alias.toUpperCase());
+      }
+    }
+  }
+  return rawDocs.filter((doc) => {
+    if (!doc.type) return true;
+    return !allKnownTypes.has(doc.type.toUpperCase());
+  });
+}
+
 const REJECTION_PRESETS = [
   "Blurry or unreadable photo / text",
   "Document expired / validity lapsed",
