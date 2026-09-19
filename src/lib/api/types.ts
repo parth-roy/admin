@@ -138,9 +138,10 @@ export interface DriverDocument {
   id: string;
   type: string;
   status: DocumentStatus;
-  fileUrl: string | null;
-  rejectedReason: string | null;
-  verifiedAt: string | null;
+  fileUrl?: string | null;
+  rejectedReason?: string | null;
+  createdAt?: string;
+  verifiedAt?: string | null;
 }
 
 export interface DriverSubscription {
@@ -153,8 +154,8 @@ export interface DriverSubscription {
 export interface DriverVehicle {
   id: string;
   registrationNo: string;
-  type: VehicleType;
-  rcVerifStatus: UlipVerifStatus;
+  type: VehicleType | string;
+  rcVerifStatus: UlipVerifStatus | string;
 }
 
 export interface DriverListItem {
@@ -168,9 +169,9 @@ export interface DriverListItem {
   totalTrips: number;
   createdAt: string;
   user: { id: string; name: string | null; phone: string; email: string | null; isActive: boolean };
-  vehicle: DriverVehicle | null;
+  vehicle?: { id: string; registrationNo: string; type: string; rcVerifStatus: string } | null;
   subscription: DriverSubscription | null;
-  documents: Pick<DriverDocument, 'id' | 'type' | 'status'>[];
+  documents: DriverDocument[];
   complianceScore?: number;
 }
 

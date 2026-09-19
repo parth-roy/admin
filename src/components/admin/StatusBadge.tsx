@@ -15,6 +15,7 @@ const map: Record<string, string> = {
   // generic
   PENDING: "bg-warning/20 text-warning-foreground border-warning/40",
   VERIFIED: "bg-success/15 text-success border-success/30",
+  REJECTED: "bg-destructive/10 text-destructive border-destructive/30",
   FAILED: "bg-destructive/10 text-destructive border-destructive/30",
   MANUAL_REVIEW: "bg-chart-5/15 text-chart-5 border-chart-5/30",
   PAID: "bg-success/15 text-success border-success/30",

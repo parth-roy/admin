@@ -52,6 +52,7 @@ export function useUpdateDocStatus() {
     }) => driversApi.updateDocStatus(driverId, docId, status, rejectedReason),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.detail(vars.driverId) });
+      qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
     },
   });
 }
