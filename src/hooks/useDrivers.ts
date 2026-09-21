@@ -111,3 +111,15 @@ export function useHardDeleteDriver() {
   });
 }
 
+export function useBulkHardDeleteDrivers() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { ids?: string[]; selectAllFiltered?: boolean; filter?: any; reason?: string }) =>
+      driversApi.bulkHardDelete(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+    },
+  });
+}
+
+

@@ -120,3 +120,17 @@ export function useHardDeleteWorker() {
   });
 }
 
+export function useBulkHardDeleteWorkers() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { ids?: string[]; selectAllFiltered?: boolean; filter?: any; reason?: string }) => {
+      const res = await api.post('/admin/workforce/bulk-hard', data);
+      return res.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workforce"] });
+    },
+  });
+}
+
+

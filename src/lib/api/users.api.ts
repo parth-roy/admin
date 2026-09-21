@@ -36,5 +36,18 @@ export const usersApi = {
     const res = await apiClient.delete<ApiResponse<{ deleted: boolean; permanent: boolean }>>(`/admin/users/${id}/hard`, { data: { reason } });
     return res.data.data;
   },
+
+  bulkHardDelete: async (data: {
+    ids?: string[];
+    selectAllFiltered?: boolean;
+    filter?: any;
+    reason?: string;
+  }): Promise<{ deletedCount: number; skippedCount: number; skipped?: any[] }> => {
+    const res = await apiClient.post<ApiResponse<{ deletedCount: number; skippedCount: number; skipped?: any[] }>>(
+      '/admin/users/bulk-hard',
+      data
+    );
+    return res.data.data;
+  },
 };
 

@@ -74,3 +74,15 @@ export function useHardDeleteUser() {
   });
 }
 
+export function useBulkHardDeleteUsers() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { ids?: string[]; selectAllFiltered?: boolean; filter?: any; reason?: string }) =>
+      usersApi.bulkHardDelete(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: USER_KEYS.all });
+    },
+  });
+}
+
+

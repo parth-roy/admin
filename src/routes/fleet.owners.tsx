@@ -24,9 +24,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   useFleetOwners, useSetFleetOwnerStatus, useFleetOwnerWalletCredit,
-  useSoftDeleteFleetOwner, useHardDeleteFleetOwner,
+  useSoftDeleteFleetOwner, useHardDeleteFleetOwner, useBulkHardDeleteFleetOwners,
 } from "@/hooks/useFleet";
 import { DeleteConfirmDialog } from "@/components/admin/DeleteConfirmDialog";
+import { BulkDeleteConfirmDialog } from "@/components/admin/BulkDeleteConfirmDialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { FleetOwnerListItem } from "@/lib/api/types";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -45,6 +47,9 @@ function FleetOwnersPage() {
   const [creditAmount, setCreditAmount] = useState("");
   const [creditNote, setCreditNote] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<FleetOwnerListItem | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectAllFiltered, setSelectAllFiltered] = useState(false);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, isLoading, isFetching } = useFleetOwners({
@@ -59,10 +64,38 @@ function FleetOwnersPage() {
   const creditMut = useFleetOwnerWalletCredit();
   const softDeleteMut = useSoftDeleteFleetOwner();
   const hardDeleteMut = useHardDeleteFleetOwner();
+  const bulkHardDeleteMut = useBulkHardDeleteFleetOwners();
 
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 25);
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-IN");
+
+  const pageIds = data?.data?.map((o: FleetOwnerListItem) => o.id) ?? [];
+  const isAllPageSelected = pageIds.length > 0 && pageIds.every((id: string) => selectedIds.has(id));
+
+  const toggleSelectAllPage = () => {
+    if (isAllPageSelected) {
+      const next = new Set(selectedIds);
+      pageIds.forEach((id: string) => next.delete(id));
+      setSelectedIds(next);
+      setSelectAllFiltered(false);
+    } else {
+      const next = new Set(selectedIds);
+      pageIds.forEach((id: string) => next.add(id));
+      setSelectedIds(next);
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+      setSelectAllFiltered(false);
+    } else {
+      next.add(id);
+    }
+    setSelectedIds(next);
+  };
 
   const handleCredit = async () => {
     if (!creditTarget) return;
@@ -77,7 +110,37 @@ function FleetOwnersPage() {
     }
   };
 
-  const resetFilters = () => { setSearch(""); setVerifiedFilter("all"); setActiveFilter("all"); setPage(1); };
+  const resetFilters = () => {
+    setSearch(""); setVerifiedFilter("all"); setActiveFilter("all"); setPage(1);
+    setSelectedIds(new Set()); setSelectAllFiltered(false);
+  };
+
+  const handleConfirmBulkDelete = async (reason: string) => {
+    try {
+      const payload: any = { reason };
+      if (selectAllFiltered) {
+        payload.selectAllFiltered = true;
+        payload.filter = {
+          isVerified: verifiedFilter === "verified" ? true : verifiedFilter === "pending" ? false : undefined,
+          isActive: activeFilter === "active" ? true : activeFilter === "inactive" ? false : undefined,
+          search: debouncedSearch || undefined,
+        };
+      } else {
+        payload.ids = Array.from(selectedIds);
+      }
+
+      const res = await bulkHardDeleteMut.mutateAsync(payload);
+      toast.success(`Successfully permanently deleted ${res.deletedCount} fleet owner(s).`);
+      if (res.skippedCount > 0) {
+        toast.warning(`Skipped ${res.skippedCount} fleet owner(s) due to active bookings.`);
+      }
+      setSelectedIds(new Set());
+      setSelectAllFiltered(false);
+      setIsBulkDeleteOpen(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to bulk delete fleet owners");
+    }
+  };
   const hasFilters = search || verifiedFilter !== "all" || activeFilter !== "all";
 
   return (
@@ -115,10 +178,78 @@ function FleetOwnersPage() {
                 <X className="h-3.5 w-3.5 mr-1" /> Clear
               </Button>
             )}
+            {hasFilters && total > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectAllFiltered(true);
+                  setIsBulkDeleteOpen(true);
+                }}
+                className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs ml-auto"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete All Filtered ({total.toLocaleString("en-IN")})
+              </Button>
+            )}
           </div>
         </Card>
 
         <Card>
+          {/* Bulk Selection Bar */}
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-red-50/90 dark:bg-red-950/40 border-b border-red-200 dark:border-red-900/60 text-red-900 dark:text-red-200 text-xs animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <span className="font-bold">
+                  {selectAllFiltered
+                    ? `All ${total.toLocaleString("en-IN")} filtered fleet owners selected`
+                    : `${selectedIds.size} fleet owner${selectedIds.size > 1 ? "s" : ""} selected on this page`}
+                </span>
+                {total > (data?.data?.length ?? 0) && !selectAllFiltered && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs font-semibold text-red-700 underline dark:text-red-400"
+                    onClick={() => setSelectAllFiltered(true)}
+                  >
+                    Select all {total.toLocaleString("en-IN")} fleet owners matching filter
+                  </Button>
+                )}
+                {selectAllFiltered && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs font-semibold text-red-700 underline dark:text-red-400"
+                    onClick={() => setSelectAllFiltered(false)}
+                  >
+                    Limit to page selection only ({selectedIds.size})
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs text-muted-foreground"
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                    setSelectAllFiltered(false);
+                  }}
+                >
+                  Deselect All
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 font-bold"
+                  onClick={() => setIsBulkDeleteOpen(true)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Bulk Delete ({selectAllFiltered ? total.toLocaleString("en-IN") : selectedIds.size})
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="relative">
             {isFetching && !isLoading && (
               <div className="absolute right-4 top-4 z-10">
@@ -128,6 +259,13 @@ function FleetOwnersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10 pl-4">
+                    <Checkbox
+                      checked={isAllPageSelected}
+                      onCheckedChange={toggleSelectAllPage}
+                      aria-label="Select all on this page"
+                    />
+                  </TableHead>
                   <TableHead>Company</TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Phone</TableHead>
@@ -144,7 +282,7 @@ function FleetOwnersPage() {
                 {isLoading ? (
                   Array.from({ length: 8 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 10 }).map((_, j) => (
+                      {Array.from({ length: 11 }).map((_, j) => (
                         <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                       ))}
                     </TableRow>
@@ -152,6 +290,13 @@ function FleetOwnersPage() {
                 ) : data?.data?.length ? (
                   data.data.map((o: FleetOwnerListItem) => (
                     <TableRow key={o.id} className="hover:bg-muted/40">
+                      <TableCell className="pl-4">
+                        <Checkbox
+                          checked={selectedIds.has(o.id)}
+                          onCheckedChange={() => toggleSelectOne(o.id)}
+                          aria-label={`Select ${o.companyName ?? o.id}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium text-sm">{o.companyName ?? "—"}</TableCell>
                       <TableCell className="text-sm">{o.user?.name ?? "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{o.user?.phone}</TableCell>
@@ -225,7 +370,7 @@ function FleetOwnersPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={10} className="py-12 text-center text-muted-foreground">No fleet owners found</TableCell>
+                    <TableCell colSpan={11} className="py-12 text-center text-muted-foreground">No fleet owners found</TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -289,6 +434,15 @@ function FleetOwnersPage() {
           }}
         />
       )}
+
+      <BulkDeleteConfirmDialog
+        open={isBulkDeleteOpen}
+        onOpenChange={setIsBulkDeleteOpen}
+        entityLabel="Fleet Owners"
+        selectedCount={selectAllFiltered ? total : selectedIds.size}
+        onConfirm={handleConfirmBulkDelete}
+        isLoading={bulkHardDeleteMut.isPending}
+      />
     </div>
   );
 }

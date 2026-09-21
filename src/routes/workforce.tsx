@@ -25,9 +25,11 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   useWorkforce, useUpdateWorkerBank, useCreditWorkerWallet,
   useWorker, useSuspendWorker, useRevokeWorkerVerification,
-  useSoftDeleteWorker, useHardDeleteWorker,
+  useSoftDeleteWorker, useHardDeleteWorker, useBulkHardDeleteWorkers,
 } from "@/hooks/useWorkforce";
 import { DeleteConfirmDialog } from "@/components/admin/DeleteConfirmDialog";
+import { BulkDeleteConfirmDialog } from "@/components/admin/BulkDeleteConfirmDialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useDebounce } from "@/hooks/useDebounce";
 import { toast } from "sonner";
 
@@ -49,6 +51,9 @@ function WorkforcePage() {
   const [viewingWorkerId, setViewingWorkerId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectAllFiltered, setSelectAllFiltered] = useState(false);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -65,10 +70,38 @@ function WorkforcePage() {
   const suspendMut = useSuspendWorker();
   const softDeleteMut = useSoftDeleteWorker();
   const hardDeleteMut = useHardDeleteWorker();
+  const bulkHardDeleteMut = useBulkHardDeleteWorkers();
 
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 25) || 1;
   const fmtDate = (iso: string) => (iso ? new Date(iso).toLocaleDateString("en-IN") : "—");
+
+  const pageIds = data?.data?.map((w: any) => w.id) ?? [];
+  const isAllPageSelected = pageIds.length > 0 && pageIds.every((id: string) => selectedIds.has(id));
+
+  const toggleSelectAllPage = () => {
+    if (isAllPageSelected) {
+      const next = new Set(selectedIds);
+      pageIds.forEach((id: string) => next.delete(id));
+      setSelectedIds(next);
+      setSelectAllFiltered(false);
+    } else {
+      const next = new Set(selectedIds);
+      pageIds.forEach((id: string) => next.add(id));
+      setSelectedIds(next);
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+      setSelectAllFiltered(false);
+    } else {
+      next.add(id);
+    }
+    setSelectedIds(next);
+  };
 
   const resetFilters = () => {
     setSearch("");
@@ -77,6 +110,37 @@ function WorkforcePage() {
     setBankStatus("all");
     setActiveStatus("all");
     setPage(1);
+    setSelectedIds(new Set());
+    setSelectAllFiltered(false);
+  };
+
+  const handleConfirmBulkDelete = async (reason: string) => {
+    try {
+      const payload: any = { reason };
+      if (selectAllFiltered) {
+        payload.selectAllFiltered = true;
+        payload.filter = {
+          status: workStatus !== "all" ? workStatus : undefined,
+          isDocVerified: docStatus === "verified" ? true : docStatus === "unverified" ? false : undefined,
+          bankVerified: bankStatus === "verified" ? true : bankStatus === "unverified" ? false : undefined,
+          isActive: activeStatus === "active" ? true : activeStatus === "suspended" ? false : undefined,
+          search: debouncedSearch || undefined,
+        };
+      } else {
+        payload.ids = Array.from(selectedIds);
+      }
+
+      const res = await bulkHardDeleteMut.mutateAsync(payload);
+      toast.success(`Successfully permanently deleted ${res.deletedCount} worker(s).`);
+      if (res.skippedCount > 0) {
+        toast.warning(`Skipped ${res.skippedCount} worker(s) due to active job assignments.`);
+      }
+      setSelectedIds(new Set());
+      setSelectAllFiltered(false);
+      setIsBulkDeleteOpen(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to bulk delete workers");
+    }
   };
 
   const hasFilters =
@@ -146,11 +210,79 @@ function WorkforcePage() {
                 <X className="h-3.5 w-3.5 mr-1" /> Clear
               </Button>
             )}
+            {hasFilters && total > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectAllFiltered(true);
+                  setIsBulkDeleteOpen(true);
+                }}
+                className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs ml-auto"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete All Filtered ({total.toLocaleString("en-IN")})
+              </Button>
+            )}
           </div>
         </Card>
 
         {/* Data Table */}
         <Card>
+          {/* Bulk Selection Bar */}
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-red-50/90 dark:bg-red-950/40 border-b border-red-200 dark:border-red-900/60 text-red-900 dark:text-red-200 text-xs animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <span className="font-bold">
+                  {selectAllFiltered
+                    ? `All ${total.toLocaleString("en-IN")} filtered workers selected`
+                    : `${selectedIds.size} worker${selectedIds.size > 1 ? "s" : ""} selected on this page`}
+                </span>
+                {total > (data?.data?.length ?? 0) && !selectAllFiltered && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs font-semibold text-red-700 underline dark:text-red-400"
+                    onClick={() => setSelectAllFiltered(true)}
+                  >
+                    Select all {total.toLocaleString("en-IN")} workers matching filter
+                  </Button>
+                )}
+                {selectAllFiltered && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs font-semibold text-red-700 underline dark:text-red-400"
+                    onClick={() => setSelectAllFiltered(false)}
+                  >
+                    Limit to page selection only ({selectedIds.size})
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs text-muted-foreground"
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                    setSelectAllFiltered(false);
+                  }}
+                >
+                  Deselect All
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 font-bold"
+                  onClick={() => setIsBulkDeleteOpen(true)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Bulk Delete ({selectAllFiltered ? total.toLocaleString("en-IN") : selectedIds.size})
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="relative">
             {isFetching && !isLoading && (
               <div className="absolute right-4 top-4 z-10">
@@ -160,6 +292,13 @@ function WorkforcePage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10 pl-4">
+                    <Checkbox
+                      checked={isAllPageSelected}
+                      onCheckedChange={toggleSelectAllPage}
+                      aria-label="Select all on this page"
+                    />
+                  </TableHead>
                   <TableHead>Worker</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Account</TableHead>
@@ -175,7 +314,7 @@ function WorkforcePage() {
                 {isLoading ? (
                   Array.from({ length: 10 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 9 }).map((_, j) => (
+                      {Array.from({ length: 10 }).map((_, j) => (
                         <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                       ))}
                     </TableRow>
@@ -183,6 +322,13 @@ function WorkforcePage() {
                 ) : data?.data?.length ? (
                   data.data.map((worker: any) => (
                     <TableRow key={worker.id} className="hover:bg-muted/40">
+                      <TableCell className="pl-4">
+                        <Checkbox
+                          checked={selectedIds.has(worker.id)}
+                          onCheckedChange={() => toggleSelectOne(worker.id)}
+                          aria-label={`Select ${worker.user?.name ?? worker.id}`}
+                        />
+                      </TableCell>
                       <TableCell>
                         <button
                           type="button"
@@ -314,7 +460,7 @@ function WorkforcePage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-12 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="py-12 text-center text-muted-foreground">
                       No workforce members found
                     </TableCell>
                   </TableRow>
@@ -396,6 +542,15 @@ function WorkforcePage() {
           }}
         />
       )}
+
+      <BulkDeleteConfirmDialog
+        open={isBulkDeleteOpen}
+        onOpenChange={setIsBulkDeleteOpen}
+        entityLabel="Workforce Members"
+        selectedCount={selectAllFiltered ? total : selectedIds.size}
+        onConfirm={handleConfirmBulkDelete}
+        isLoading={bulkHardDeleteMut.isPending}
+      />
     </div>
   );
 }

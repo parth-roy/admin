@@ -32,6 +32,19 @@ export const fleetApi = {
     return res.data.data;
   },
 
+  bulkHardDeleteOwners: async (data: {
+    ids?: string[];
+    selectAllFiltered?: boolean;
+    filter?: any;
+    reason?: string;
+  }): Promise<{ deletedCount: number; skippedCount: number; skipped?: any[] }> => {
+    const res = await apiClient.post<ApiResponse<{ deletedCount: number; skippedCount: number; skipped?: any[] }>>(
+      '/admin/fleet-owners/bulk-hard',
+      data
+    );
+    return res.data.data;
+  },
+
   listTrucks: async (params: FleetParams = {}): Promise<Paginated<FleetTruck>> => {
     const res = await apiClient.get<ApiResponse<Paginated<FleetTruck>>>('/admin/fleet-trucks', { params });
     return res.data.data;
@@ -39,6 +52,24 @@ export const fleetApi = {
 
   getExpiringTrucks: async (days = 30): Promise<FleetTruck[]> => {
     const res = await apiClient.get<ApiResponse<FleetTruck[]>>('/admin/fleet-trucks/expiring', { params: { days } });
+    return res.data.data;
+  },
+
+  hardDeleteTruck: async (id: string, reason: string): Promise<{ deleted: boolean; permanent: boolean }> => {
+    const res = await apiClient.delete<ApiResponse<{ deleted: boolean; permanent: boolean }>>(`/admin/fleet-trucks/${id}/hard`, { data: { reason } });
+    return res.data.data;
+  },
+
+  bulkHardDeleteTrucks: async (data: {
+    ids?: string[];
+    selectAllFiltered?: boolean;
+    filter?: any;
+    reason?: string;
+  }): Promise<{ deletedCount: number; skippedCount: number; skipped?: any[] }> => {
+    const res = await apiClient.post<ApiResponse<{ deletedCount: number; skippedCount: number; skipped?: any[] }>>(
+      '/admin/fleet-trucks/bulk-hard',
+      data
+    );
     return res.data.data;
   },
 };

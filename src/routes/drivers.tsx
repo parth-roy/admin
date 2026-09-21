@@ -19,9 +19,11 @@ import {
 } from "@/components/ui/select";
 import {
   useDrivers, useBlockDriver, useOverrideDriverStatus,
-  useSoftDeleteDriver, useHardDeleteDriver,
+  useSoftDeleteDriver, useHardDeleteDriver, useBulkHardDeleteDrivers,
 } from "@/hooks/useDrivers";
 import { DeleteConfirmDialog } from "@/components/admin/DeleteConfirmDialog";
+import { BulkDeleteConfirmDialog } from "@/components/admin/BulkDeleteConfirmDialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { DriverStatus, UlipVerifStatus, DriverListItem } from "@/lib/api/types";
 import { toast } from "sonner";
@@ -39,6 +41,9 @@ function DriversPage() {
   const [docVerif, setDocVerif] = useState("all");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DriverListItem | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectAllFiltered, setSelectAllFiltered] = useState(false);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, isLoading, isFetching } = useDrivers({
@@ -54,13 +59,72 @@ function DriversPage() {
   const overrideStatusMut = useOverrideDriverStatus();
   const softDeleteMut = useSoftDeleteDriver();
   const hardDeleteMut = useHardDeleteDriver();
+  const bulkHardDeleteMut = useBulkHardDeleteDrivers();
 
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 25);
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-IN");
 
-  const resetFilters = () => { setSearch(""); setStatus("all"); setDlVerif("all"); setDocVerif("all"); setPage(1); };
+  const pageIds = data?.data?.map((d: DriverListItem) => d.id) ?? [];
+  const isAllPageSelected = pageIds.length > 0 && pageIds.every((id: string) => selectedIds.has(id));
+
+  const toggleSelectAllPage = () => {
+    if (isAllPageSelected) {
+      const next = new Set(selectedIds);
+      pageIds.forEach((id: string) => next.delete(id));
+      setSelectedIds(next);
+      setSelectAllFiltered(false);
+    } else {
+      const next = new Set(selectedIds);
+      pageIds.forEach((id: string) => next.add(id));
+      setSelectedIds(next);
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+      setSelectAllFiltered(false);
+    } else {
+      next.add(id);
+    }
+    setSelectedIds(next);
+  };
+
+  const resetFilters = () => {
+    setSearch(""); setStatus("all"); setDlVerif("all"); setDocVerif("all"); setPage(1);
+    setSelectedIds(new Set()); setSelectAllFiltered(false);
+  };
   const hasFilters = search || status !== "all" || dlVerif !== "all" || docVerif !== "all";
+
+  const handleConfirmBulkDelete = async (reason: string) => {
+    try {
+      const payload: any = { reason };
+      if (selectAllFiltered) {
+        payload.selectAllFiltered = true;
+        payload.filter = {
+          status: status !== "all" ? status : undefined,
+          dlVerifStatus: dlVerif !== "all" ? dlVerif : undefined,
+          isDocVerified: docVerif === "verified" ? true : docVerif === "unverified" ? false : undefined,
+          search: debouncedSearch || undefined,
+        };
+      } else {
+        payload.ids = Array.from(selectedIds);
+      }
+
+      const res = await bulkHardDeleteMut.mutateAsync(payload);
+      toast.success(`Successfully permanently deleted ${res.deletedCount} driver(s).`);
+      if (res.skippedCount > 0) {
+        toast.warning(`Skipped ${res.skippedCount} driver(s) due to active bookings.`);
+      }
+      setSelectedIds(new Set());
+      setSelectAllFiltered(false);
+      setIsBulkDeleteOpen(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to bulk delete drivers");
+    }
+  };
 
   return (
     <div>
@@ -109,10 +173,78 @@ function DriversPage() {
                 <X className="h-3.5 w-3.5 mr-1" /> Clear
               </Button>
             )}
+            {hasFilters && total > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectAllFiltered(true);
+                  setIsBulkDeleteOpen(true);
+                }}
+                className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs ml-auto"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete All Filtered ({total.toLocaleString("en-IN")})
+              </Button>
+            )}
           </div>
         </Card>
 
         <Card>
+          {/* Bulk Selection Bar */}
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-red-50/90 dark:bg-red-950/40 border-b border-red-200 dark:border-red-900/60 text-red-900 dark:text-red-200 text-xs animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <span className="font-bold">
+                  {selectAllFiltered
+                    ? `All ${total.toLocaleString("en-IN")} filtered drivers selected`
+                    : `${selectedIds.size} driver${selectedIds.size > 1 ? "s" : ""} selected on this page`}
+                </span>
+                {total > (data?.data?.length ?? 0) && !selectAllFiltered && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs font-semibold text-red-700 underline dark:text-red-400"
+                    onClick={() => setSelectAllFiltered(true)}
+                  >
+                    Select all {total.toLocaleString("en-IN")} drivers matching filter
+                  </Button>
+                )}
+                {selectAllFiltered && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs font-semibold text-red-700 underline dark:text-red-400"
+                    onClick={() => setSelectAllFiltered(false)}
+                  >
+                    Limit to page selection only ({selectedIds.size})
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs text-muted-foreground"
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                    setSelectAllFiltered(false);
+                  }}
+                >
+                  Deselect All
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 font-bold"
+                  onClick={() => setIsBulkDeleteOpen(true)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Bulk Delete ({selectAllFiltered ? total.toLocaleString("en-IN") : selectedIds.size})
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="relative">
             {isFetching && !isLoading && (
               <div className="absolute right-4 top-4 z-10">
@@ -122,6 +254,13 @@ function DriversPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10 pl-4">
+                    <Checkbox
+                      checked={isAllPageSelected}
+                      onCheckedChange={toggleSelectAllPage}
+                      aria-label="Select all on this page"
+                    />
+                  </TableHead>
                   <TableHead>Driver</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Account</TableHead>
@@ -139,7 +278,7 @@ function DriversPage() {
                 {isLoading ? (
                   Array.from({ length: 10 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 11 }).map((_, j) => (
+                      {Array.from({ length: 12 }).map((_, j) => (
                         <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                       ))}
                     </TableRow>
@@ -147,6 +286,13 @@ function DriversPage() {
                 ) : data?.data?.length ? (
                   data.data.map((d: DriverListItem) => (
                     <TableRow key={d.id} className="hover:bg-muted/40">
+                      <TableCell className="pl-4">
+                        <Checkbox
+                          checked={selectedIds.has(d.id)}
+                          onCheckedChange={() => toggleSelectOne(d.id)}
+                          aria-label={`Select ${d.user?.name ?? d.id}`}
+                        />
+                      </TableCell>
                       <TableCell>
                         <Link to="/verification" className="font-medium text-sm hover:underline text-info">
                           {d.user?.name ?? "—"}
@@ -239,7 +385,7 @@ function DriversPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={11} className="py-12 text-center text-muted-foreground">
+                    <TableCell colSpan={12} className="py-12 text-center text-muted-foreground">
                       No drivers found
                     </TableCell>
                   </TableRow>
@@ -281,6 +427,15 @@ function DriversPage() {
           }}
         />
       )}
+
+      <BulkDeleteConfirmDialog
+        open={isBulkDeleteOpen}
+        onOpenChange={setIsBulkDeleteOpen}
+        entityLabel="Drivers"
+        selectedCount={selectAllFiltered ? total : selectedIds.size}
+        onConfirm={handleConfirmBulkDelete}
+        isLoading={bulkHardDeleteMut.isPending}
+      />
     </div>
   );
 }

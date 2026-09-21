@@ -69,6 +69,17 @@ export function useHardDeleteFleetOwner() {
   });
 }
 
+export function useBulkHardDeleteFleetOwners() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { ids?: string[]; selectAllFiltered?: boolean; filter?: any; reason?: string }) =>
+      fleetApi.bulkHardDeleteOwners(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fleet'] });
+    },
+  });
+}
+
 export function useFleetTrucks(params: FleetParams = {}) {
   return useQuery({
     queryKey: FLEET_KEYS.trucks(params),
@@ -85,4 +96,26 @@ export function useExpiringTrucks(days = 30) {
     staleTime: 5 * 60_000,
   });
 }
+
+export function useHardDeleteFleetTruck() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => fleetApi.hardDeleteTruck(id, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fleet'] });
+    },
+  });
+}
+
+export function useBulkHardDeleteFleetTrucks() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { ids?: string[]; selectAllFiltered?: boolean; filter?: any; reason?: string }) =>
+      fleetApi.bulkHardDeleteTrucks(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fleet'] });
+    },
+  });
+}
+
 
