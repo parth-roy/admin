@@ -22,6 +22,7 @@ function WorkforceBookingsPage() {
                 <TableHead>Job No</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Source</TableHead>
                 <TableHead>Urgency</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Total Fare</TableHead>
@@ -29,9 +30,9 @@ function WorkforceBookingsPage() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-8">Loading...</TableCell></TableRow>
               ) : gigs?.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8">No bookings found.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-8">No bookings found.</TableCell></TableRow>
               ) : (
                 gigs?.map((gig: any) => (
                   <TableRow key={gig.id} className="hover:bg-slate-50/50 transition-colors">
@@ -46,6 +47,17 @@ function WorkforceBookingsPage() {
                       <div className="text-xs text-muted-foreground">{gig.customer?.phone}</div>
                     </TableCell>
                     <TableCell className="font-medium">{gig.gigCategory}</TableCell>
+                    <TableCell>
+                      {gig.source === 'WEB' ? (
+                        <span className="text-xs font-bold px-2 py-1 rounded bg-violet-100 text-violet-700 border border-violet-200">
+                          🌐 Web
+                        </span>
+                      ) : (
+                        <span className="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-600">
+                          📱 App
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <span className="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-700">
                         {gig.urgency?.replace('_', ' ')}
