@@ -17,13 +17,26 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script_stop: true
-          command_timeout: 10m
+          command_timeout: 15m
           script: |
             set -eux
             export NVM_DIR="$HOME/.nvm"
             if [ -s "$NVM_DIR/nvm.sh" ]; then
               . "$NVM_DIR/nvm.sh"
             fi
+
+            # Ensure swap is active on droplet to prevent Linux kernel OOM Killer (status 137) during Nitro bundling
+            if [ $(swapon --show | wc -l) -le 1 ]; then
+              echo "==> Configuring swap on droplet..."
+              if [ ! -f /swapfile ]; then
+                fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
+                chmod 600 /swapfile
+                mkswap /swapfile
+                echo '/swapfile none swap sw 0 0' >> /etc/fstab || true
+              fi
+              swapon /swapfile || true
+            fi
+
             cd /var/www/admin.gomytruck.com/admin
 
             pwd
@@ -37,6 +50,7 @@ jobs:
 
             npm install --no-audit --no-fund
             export VITE_API_BASE_URL="https://api.gomytruck.com/api/v1"
+            export NODE_OPTIONS="--max-old-space-size=2048"
             npm run build
 
             if pm2 describe admin-panel > /dev/null; then
