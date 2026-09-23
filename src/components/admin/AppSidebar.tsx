@@ -91,7 +91,7 @@ const sections: MenuSection[] = [
       { title: "All Bookings", url: "/bookings", icon: ClipboardList, domain: "gomytruck" },
       { title: "Manual Bookings", url: "/manual-bookings", icon: Truck, domain: "gomytruck" },
       { title: "Workforce Bookings", url: "/workforce-bookings", icon: ClipboardList, domain: "metromitra" },
-      { title: "Dispatch Queue", url: "/dispatch", icon: Radio, domain: "gomytruck" },
+      // { title: "Dispatch Queue", url: "/dispatch", icon: Radio, domain: "gomytruck" },
       { title: "Driver Verification", url: "/verification", icon: ShieldCheck, domain: "gomytruck" },
       { title: "Workforce Verification", url: "/workforce/verification", icon: FileCheck2, domain: "metromitra" },
     ],
@@ -104,7 +104,7 @@ const sections: MenuSection[] = [
       { title: "Workforce", url: "/workforce", icon: Users, domain: "metromitra" },
       { title: "Fleet Owners", url: "/fleet/owners", icon: Building2, domain: "gomytruck" },
       { title: "Fleet Trucks", url: "/fleet/trucks", icon: Truck, domain: "gomytruck" },
-      { title: "Truck Compliance", url: "/fleet/compliance", icon: FileCheck2, domain: "gomytruck" },
+      // { title: "Truck Compliance", url: "/fleet/compliance", icon: FileCheck2, domain: "gomytruck" },
     ],
   },
   {
@@ -112,33 +112,33 @@ const sections: MenuSection[] = [
     items: [
       { title: "Revenue", url: "/finance/revenue", icon: BadgeIndianRupee, domain: "gomytruck" },
       { title: "Gateway Transactions", url: "/finance/transactions", icon: CreditCard, domain: "all" },
-      { title: "Earnings & Payouts", url: "/finance/earnings", icon: Wallet, domain: "all" },
-      { title: "Subscriptions", url: "/finance/subscriptions", icon: Receipt, domain: "gomytruck" },
-      { title: "Wallets", url: "/finance/wallets", icon: Boxes, domain: "all" },
-      { title: "Withdrawals", url: "/finance/withdrawals", icon: Banknote, domain: "all" },
-      { title: "Refunds", url: "/finance/refunds", icon: FileText, domain: "gomytruck" },
+      // { title: "Earnings & Payouts", url: "/finance/earnings", icon: Wallet, domain: "all" },
+      // { title: "Subscriptions", url: "/finance/subscriptions", icon: Receipt, domain: "gomytruck" },
+      // { title: "Wallets", url: "/finance/wallets", icon: Boxes, domain: "all" },
+      // { title: "Withdrawals", url: "/finance/withdrawals", icon: Banknote, domain: "all" },
+      // { title: "Refunds", url: "/finance/refunds", icon: FileText, domain: "gomytruck" },
     ],
   },
-  {
+  /* {
     label: "Support",
     domain: "all",
     items: [{ title: "Tickets", url: "/support", icon: LifeBuoy, domain: "all" }],
-  },
+  }, */
   {
     label: "Platform Management",
     items: [
-      { title: "Pricing Config", url: "/platform/pricing", icon: Settings, domain: "all" },
+      // { title: "Pricing Config", url: "/platform/pricing", icon: Settings, domain: "all" },
       { title: "Announcements", url: "/platform/announcements", icon: Megaphone, domain: "gomytruck" },
       { title: "Workforce Announcements", url: "/platform/workforce-announcements", icon: Megaphone, domain: "metromitra" },
       { title: "Notifications", url: "/platform/notifications", icon: Bell, domain: "all" },
-      { title: "Gamification", url: "/platform/gamification", icon: ShieldCheck, domain: "gomytruck" },
-      { title: "Training", url: "/platform/training", icon: GraduationCap, domain: "all" },
+      // { title: "Gamification", url: "/platform/gamification", icon: ShieldCheck, domain: "gomytruck" },
+      // { title: "Training", url: "/platform/training", icon: GraduationCap, domain: "all" },
       { title: "Form Gig Onboard Leads", url: "/platform/form-gig-onboard-leads", icon: ClipboardList, domain: "metromitra" },
       { title: "Direct Contact Approvals", url: "/platform/direct-contact-approvals", icon: CheckCircle2, domain: "metromitra" },
       { title: "Form Driver Leads", url: "/platform/form-driver-leads", icon: ClipboardList, domain: "gomytruck" },
     ],
   },
-  {
+  /* {
     label: "Compliance & Audit",
     domain: "gomytruck",
     items: [
@@ -146,12 +146,12 @@ const sections: MenuSection[] = [
       { title: "ULIP Logs", url: "/compliance/ulip", icon: ScrollText, domain: "gomytruck" },
       { title: "Document Expiry", url: "/compliance/expiry", icon: CalendarClock, domain: "gomytruck" },
     ],
-  },
-  {
+  }, */
+  /* {
     label: "Reports & Analytics",
     domain: "all",
     items: [{ title: "Business Reports", url: "/reports", icon: BarChart3, domain: "all" }],
-  },
+  }, */
 ];
 
 export function AppSidebar() {
