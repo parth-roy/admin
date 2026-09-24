@@ -250,7 +250,7 @@ export default function TransportAgentsPage() {
               agents.map((agent: any) => (
                 <TableRow key={agent.id}>
                   <TableCell>
-                    <div className="font-semibold text-foreground">{agent.user?.name || "Unnamed Agent"}</div>
+                    <div className="font-semibold text-foreground">{agent.user?.name || (agent.user?.phone ? `Agent (${agent.user.phone.slice(-4)})` : "GMT Agent")}</div>
                     <div className="text-xs text-muted-foreground">{agent.user?.phone}</div>
                     {agent.user?.email && <div className="text-xs text-muted-foreground">{agent.user?.email}</div>}
                   </TableCell>
