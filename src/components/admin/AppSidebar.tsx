@@ -101,6 +101,7 @@ const sections: MenuSection[] = [
     items: [
       { title: "Customers", url: "/customers", icon: Users, domain: "all" },
       { title: "Drivers", url: "/drivers", icon: Package, domain: "gomytruck" },
+      { title: "Transport Agents", url: "/agents", icon: Users, domain: "gomytruck" },
       { title: "Workforce", url: "/workforce", icon: Users, domain: "metromitra" },
       { title: "Fleet Owners", url: "/fleet/owners", icon: Building2, domain: "gomytruck" },
       { title: "Fleet Trucks", url: "/fleet/trucks", icon: Truck, domain: "gomytruck" },
@@ -112,6 +113,7 @@ const sections: MenuSection[] = [
     items: [
       { title: "Revenue", url: "/finance/revenue", icon: BadgeIndianRupee, domain: "gomytruck" },
       { title: "Gateway Transactions", url: "/finance/transactions", icon: CreditCard, domain: "all" },
+      { title: "Agent Bounties & Commission", url: "/broker-bounties", icon: BadgeIndianRupee, domain: "gomytruck" },
       // { title: "Earnings & Payouts", url: "/finance/earnings", icon: Wallet, domain: "all" },
       // { title: "Subscriptions", url: "/finance/subscriptions", icon: Receipt, domain: "gomytruck" },
       // { title: "Wallets", url: "/finance/wallets", icon: Boxes, domain: "all" },

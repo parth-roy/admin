@@ -21,6 +21,8 @@ import { Route as DriversRouteImport } from './routes/drivers'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
+import { Route as BrokerBountiesRouteImport } from './routes/broker-bounties'
+import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkforceBookingsIndexRouteImport } from './routes/workforce-bookings.index'
 import { Route as ManualBookingsIndexRouteImport } from './routes/manual-bookings.index'
@@ -111,6 +113,16 @@ const CustomersRoute = CustomersRouteImport.update({
 const ComplianceRoute = ComplianceRouteImport.update({
   id: '/compliance',
   path: '/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrokerBountiesRoute = BrokerBountiesRouteImport.update({
+  id: '/broker-bounties',
+  path: '/broker-bounties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -276,6 +288,8 @@ const PlatformFormDriverLeadsIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/broker-bounties': typeof BrokerBountiesRoute
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
@@ -321,6 +335,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/broker-bounties': typeof BrokerBountiesRoute
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
@@ -367,6 +383,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/broker-bounties': typeof BrokerBountiesRoute
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
@@ -414,6 +432,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agents'
+    | '/broker-bounties'
     | '/compliance'
     | '/customers'
     | '/dispatch'
@@ -459,6 +479,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agents'
+    | '/broker-bounties'
     | '/compliance'
     | '/customers'
     | '/dispatch'
@@ -504,6 +526,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/agents'
+    | '/broker-bounties'
     | '/compliance'
     | '/customers'
     | '/dispatch'
@@ -550,6 +574,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgentsRoute: typeof AgentsRoute
+  BrokerBountiesRoute: typeof BrokerBountiesRoute
   ComplianceRoute: typeof ComplianceRouteWithChildren
   CustomersRoute: typeof CustomersRoute
   DispatchRoute: typeof DispatchRoute
@@ -676,6 +702,20 @@ declare module '@tanstack/react-router' {
       path: '/compliance'
       fullPath: '/compliance'
       preLoaderRoute: typeof ComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/broker-bounties': {
+      id: '/broker-bounties'
+      path: '/broker-bounties'
+      fullPath: '/broker-bounties'
+      preLoaderRoute: typeof BrokerBountiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -914,6 +954,8 @@ const ComplianceRouteWithChildren = ComplianceRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgentsRoute: AgentsRoute,
+  BrokerBountiesRoute: BrokerBountiesRoute,
   ComplianceRoute: ComplianceRouteWithChildren,
   CustomersRoute: CustomersRoute,
   DispatchRoute: DispatchRoute,
