@@ -22,11 +22,11 @@ import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
 import { Route as BrokerBountiesRouteImport } from './routes/broker-bounties'
-import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkforceBookingsIndexRouteImport } from './routes/workforce-bookings.index'
 import { Route as ManualBookingsIndexRouteImport } from './routes/manual-bookings.index'
 import { Route as BookingsIndexRouteImport } from './routes/bookings.index'
+import { Route as AgentsIndexRouteImport } from './routes/agents.index'
 import { Route as WorkforceVerificationRouteImport } from './routes/workforce_.verification'
 import { Route as WorkforceBookingsIdRouteImport } from './routes/workforce-bookings.$id'
 import { Route as PlatformWorkforceAnnouncementsRouteImport } from './routes/platform.workforce-announcements'
@@ -52,6 +52,8 @@ import { Route as FinanceEarningsRouteImport } from './routes/finance.earnings'
 import { Route as ComplianceUlipRouteImport } from './routes/compliance.ulip'
 import { Route as ComplianceExpiryRouteImport } from './routes/compliance.expiry'
 import { Route as BookingsIdRouteImport } from './routes/bookings.$id'
+import { Route as AgentsRegisterRouteImport } from './routes/agents_.register'
+import { Route as AgentsPayoutsRouteImport } from './routes/agents_.payouts'
 import { Route as PlatformFormGigOnboardLeadsIdRouteImport } from './routes/platform.form-gig-onboard-leads_.$id'
 import { Route as PlatformFormDriverLeadsIdRouteImport } from './routes/platform.form-driver-leads_.$id'
 
@@ -120,11 +122,6 @@ const BrokerBountiesRoute = BrokerBountiesRouteImport.update({
   path: '/broker-bounties',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AgentsRoute = AgentsRouteImport.update({
-  id: '/agents',
-  path: '/agents',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -143,6 +140,11 @@ const ManualBookingsIndexRoute = ManualBookingsIndexRouteImport.update({
 const BookingsIndexRoute = BookingsIndexRouteImport.update({
   id: '/bookings/',
   path: '/bookings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsIndexRoute = AgentsIndexRouteImport.update({
+  id: '/agents/',
+  path: '/agents/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkforceVerificationRoute = WorkforceVerificationRouteImport.update({
@@ -273,6 +275,16 @@ const BookingsIdRoute = BookingsIdRouteImport.update({
   path: '/bookings/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentsRegisterRoute = AgentsRegisterRouteImport.update({
+  id: '/agents_/register',
+  path: '/agents/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsPayoutsRoute = AgentsPayoutsRouteImport.update({
+  id: '/agents_/payouts',
+  path: '/agents/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlatformFormGigOnboardLeadsIdRoute =
   PlatformFormGigOnboardLeadsIdRouteImport.update({
     id: '/platform/form-gig-onboard-leads_/$id',
@@ -288,7 +300,6 @@ const PlatformFormDriverLeadsIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
   '/broker-bounties': typeof BrokerBountiesRoute
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
@@ -302,6 +313,8 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/workforce': typeof WorkforceRoute
+  '/agents/payouts': typeof AgentsPayoutsRoute
+  '/agents/register': typeof AgentsRegisterRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -327,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
+  '/agents/': typeof AgentsIndexRoute
   '/bookings/': typeof BookingsIndexRoute
   '/manual-bookings/': typeof ManualBookingsIndexRoute
   '/workforce-bookings/': typeof WorkforceBookingsIndexRoute
@@ -335,7 +349,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
   '/broker-bounties': typeof BrokerBountiesRoute
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
@@ -349,6 +362,8 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/workforce': typeof WorkforceRoute
+  '/agents/payouts': typeof AgentsPayoutsRoute
+  '/agents/register': typeof AgentsRegisterRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -374,6 +389,7 @@ export interface FileRoutesByTo {
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce/verification': typeof WorkforceVerificationRoute
+  '/agents': typeof AgentsIndexRoute
   '/bookings': typeof BookingsIndexRoute
   '/manual-bookings': typeof ManualBookingsIndexRoute
   '/workforce-bookings': typeof WorkforceBookingsIndexRoute
@@ -383,7 +399,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
   '/broker-bounties': typeof BrokerBountiesRoute
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
@@ -397,6 +412,8 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/verification': typeof VerificationRoute
   '/workforce': typeof WorkforceRoute
+  '/agents_/payouts': typeof AgentsPayoutsRoute
+  '/agents_/register': typeof AgentsRegisterRoute
   '/bookings/$id': typeof BookingsIdRoute
   '/compliance/expiry': typeof ComplianceExpiryRoute
   '/compliance/ulip': typeof ComplianceUlipRoute
@@ -422,6 +439,7 @@ export interface FileRoutesById {
   '/platform/workforce-announcements': typeof PlatformWorkforceAnnouncementsRoute
   '/workforce-bookings/$id': typeof WorkforceBookingsIdRoute
   '/workforce_/verification': typeof WorkforceVerificationRoute
+  '/agents/': typeof AgentsIndexRoute
   '/bookings/': typeof BookingsIndexRoute
   '/manual-bookings/': typeof ManualBookingsIndexRoute
   '/workforce-bookings/': typeof WorkforceBookingsIndexRoute
@@ -432,7 +450,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/agents'
     | '/broker-bounties'
     | '/compliance'
     | '/customers'
@@ -446,6 +463,8 @@ export interface FileRouteTypes {
     | '/support'
     | '/verification'
     | '/workforce'
+    | '/agents/payouts'
+    | '/agents/register'
     | '/bookings/$id'
     | '/compliance/expiry'
     | '/compliance/ulip'
@@ -471,6 +490,7 @@ export interface FileRouteTypes {
     | '/platform/workforce-announcements'
     | '/workforce-bookings/$id'
     | '/workforce/verification'
+    | '/agents/'
     | '/bookings/'
     | '/manual-bookings/'
     | '/workforce-bookings/'
@@ -479,7 +499,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/agents'
     | '/broker-bounties'
     | '/compliance'
     | '/customers'
@@ -493,6 +512,8 @@ export interface FileRouteTypes {
     | '/support'
     | '/verification'
     | '/workforce'
+    | '/agents/payouts'
+    | '/agents/register'
     | '/bookings/$id'
     | '/compliance/expiry'
     | '/compliance/ulip'
@@ -518,6 +539,7 @@ export interface FileRouteTypes {
     | '/platform/workforce-announcements'
     | '/workforce-bookings/$id'
     | '/workforce/verification'
+    | '/agents'
     | '/bookings'
     | '/manual-bookings'
     | '/workforce-bookings'
@@ -526,7 +548,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/agents'
     | '/broker-bounties'
     | '/compliance'
     | '/customers'
@@ -540,6 +561,8 @@ export interface FileRouteTypes {
     | '/support'
     | '/verification'
     | '/workforce'
+    | '/agents_/payouts'
+    | '/agents_/register'
     | '/bookings/$id'
     | '/compliance/expiry'
     | '/compliance/ulip'
@@ -565,6 +588,7 @@ export interface FileRouteTypes {
     | '/platform/workforce-announcements'
     | '/workforce-bookings/$id'
     | '/workforce_/verification'
+    | '/agents/'
     | '/bookings/'
     | '/manual-bookings/'
     | '/workforce-bookings/'
@@ -574,7 +598,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AgentsRoute: typeof AgentsRoute
   BrokerBountiesRoute: typeof BrokerBountiesRoute
   ComplianceRoute: typeof ComplianceRouteWithChildren
   CustomersRoute: typeof CustomersRoute
@@ -588,6 +611,8 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   VerificationRoute: typeof VerificationRoute
   WorkforceRoute: typeof WorkforceRoute
+  AgentsPayoutsRoute: typeof AgentsPayoutsRoute
+  AgentsRegisterRoute: typeof AgentsRegisterRoute
   BookingsIdRoute: typeof BookingsIdRoute
   FinanceEarningsRoute: typeof FinanceEarningsRoute
   FinanceRefundsRoute: typeof FinanceRefundsRoute
@@ -611,6 +636,7 @@ export interface RootRouteChildren {
   PlatformWorkforceAnnouncementsRoute: typeof PlatformWorkforceAnnouncementsRoute
   WorkforceBookingsIdRoute: typeof WorkforceBookingsIdRoute
   WorkforceVerificationRoute: typeof WorkforceVerificationRoute
+  AgentsIndexRoute: typeof AgentsIndexRoute
   BookingsIndexRoute: typeof BookingsIndexRoute
   ManualBookingsIndexRoute: typeof ManualBookingsIndexRoute
   WorkforceBookingsIndexRoute: typeof WorkforceBookingsIndexRoute
@@ -711,13 +737,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrokerBountiesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/agents': {
-      id: '/agents'
-      path: '/agents'
-      fullPath: '/agents'
-      preLoaderRoute: typeof AgentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -744,6 +763,13 @@ declare module '@tanstack/react-router' {
       path: '/bookings'
       fullPath: '/bookings/'
       preLoaderRoute: typeof BookingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents/': {
+      id: '/agents/'
+      path: '/agents'
+      fullPath: '/agents/'
+      preLoaderRoute: typeof AgentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/workforce_/verification': {
@@ -921,6 +947,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agents_/register': {
+      id: '/agents_/register'
+      path: '/agents/register'
+      fullPath: '/agents/register'
+      preLoaderRoute: typeof AgentsRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents_/payouts': {
+      id: '/agents_/payouts'
+      path: '/agents/payouts'
+      fullPath: '/agents/payouts'
+      preLoaderRoute: typeof AgentsPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform/form-gig-onboard-leads_/$id': {
       id: '/platform/form-gig-onboard-leads_/$id'
       path: '/platform/form-gig-onboard-leads/$id'
@@ -954,7 +994,6 @@ const ComplianceRouteWithChildren = ComplianceRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AgentsRoute: AgentsRoute,
   BrokerBountiesRoute: BrokerBountiesRoute,
   ComplianceRoute: ComplianceRouteWithChildren,
   CustomersRoute: CustomersRoute,
@@ -968,6 +1007,8 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   VerificationRoute: VerificationRoute,
   WorkforceRoute: WorkforceRoute,
+  AgentsPayoutsRoute: AgentsPayoutsRoute,
+  AgentsRegisterRoute: AgentsRegisterRoute,
   BookingsIdRoute: BookingsIdRoute,
   FinanceEarningsRoute: FinanceEarningsRoute,
   FinanceRefundsRoute: FinanceRefundsRoute,
@@ -991,6 +1032,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformWorkforceAnnouncementsRoute: PlatformWorkforceAnnouncementsRoute,
   WorkforceBookingsIdRoute: WorkforceBookingsIdRoute,
   WorkforceVerificationRoute: WorkforceVerificationRoute,
+  AgentsIndexRoute: AgentsIndexRoute,
   BookingsIndexRoute: BookingsIndexRoute,
   ManualBookingsIndexRoute: ManualBookingsIndexRoute,
   WorkforceBookingsIndexRoute: WorkforceBookingsIndexRoute,

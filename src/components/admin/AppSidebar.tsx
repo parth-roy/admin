@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -44,8 +44,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,11 +68,17 @@ import { useUnreadBookings } from "@/hooks/useUnreadBookings";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+interface SubMenuItem {
+  title: string;
+  url: string;
+}
+
 interface MenuItem {
   title: string;
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   domain?: AdminWorkspaceMode;
+  subItems?: SubMenuItem[];
 }
 
 interface MenuSection {
@@ -101,7 +111,17 @@ const sections: MenuSection[] = [
     items: [
       { title: "Customers", url: "/customers", icon: Users, domain: "all" },
       { title: "Drivers", url: "/drivers", icon: Package, domain: "gomytruck" },
-      { title: "Transport Agents", url: "/agents", icon: Users, domain: "gomytruck" },
+      {
+        title: "Transport Agents",
+        url: "/agents",
+        icon: Users,
+        domain: "gomytruck",
+        subItems: [
+          { title: "Manage", url: "/agents" },
+          { title: "Manual Registration", url: "/agents/register" },
+          { title: "Payouts", url: "/agents/payouts" },
+        ],
+      },
       { title: "Workforce", url: "/workforce", icon: Users, domain: "metromitra" },
       { title: "Fleet Owners", url: "/fleet/owners", icon: Building2, domain: "gomytruck" },
       { title: "Fleet Trucks", url: "/fleet/trucks", icon: Truck, domain: "gomytruck" },
@@ -167,6 +187,32 @@ export function AppSidebar() {
     // /workforce matching /workforce/verification
     return pathname === url || pathname.startsWith(url + "/");
   };
+
+  const isSubItemActive = (subUrl: string) => {
+    const cleanPath = pathname.replace(/\/$/, "");
+    const cleanSub = subUrl.replace(/\/$/, "");
+    return cleanPath === cleanSub;
+  };
+
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
+    "Transport Agents": true,
+  });
+
+  useEffect(() => {
+    sections.forEach((sec) => {
+      sec.items.forEach((it) => {
+        if (it.subItems && it.subItems.length > 0) {
+          const hasActiveChild =
+            it.subItems.some((s) => isSubItemActive(s.url)) ||
+            pathname === it.url ||
+            pathname.startsWith(it.url + "/");
+          if (hasActiveChild) {
+            setOpenDropdowns((prev) => (prev[it.title] ? prev : { ...prev, [it.title]: true }));
+          }
+        }
+      });
+    });
+  }, [pathname]);
 
   const { data: pendingData } = useQuery({
     queryKey: ["pendingWorkerDocumentsCount"],
@@ -339,31 +385,110 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-1">
-                {section.items.map((item) => (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                      <Link to={item.url} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-200 hover:text-white rounded-lg transition-colors">
-                        <item.icon className="h-4.5 w-4.5 shrink-0" />
-                        <span className="text-sm font-medium">{item.title}</span>
-                        {item.url === "/workforce/verification" && pendingCount > 0 && (
-                          <div className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white group-data-[collapsible=icon]:hidden shadow-xs">
-                            {pendingCount}
-                          </div>
-                        )}
-                        {item.url === "/bookings" && unreadBookingsCount > 0 && (
-                          <div className="ml-auto flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white group-data-[collapsible=icon]:hidden shadow-xs animate-in fade-in zoom-in-75">
-                            {unreadBookingsCount > 99 ? "99+" : unreadBookingsCount}
-                          </div>
-                        )}
-                        {isActive(item.url) &&
-                          !(item.url === "/workforce/verification" && pendingCount > 0) &&
-                          !(item.url === "/bookings" && unreadBookingsCount > 0) && (
-                            <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
+                {section.items.map((item) => {
+                  if (item.subItems && item.subItems.length > 0) {
+                    const isParentActive =
+                      item.subItems.some((s) => isSubItemActive(s.url)) ||
+                      pathname === item.url ||
+                      pathname.startsWith(item.url + "/");
+                    const isOpen = openDropdowns[item.title] ?? isParentActive;
+
+                    return (
+                      <Collapsible
+                        key={item.title}
+                        open={isOpen}
+                        onOpenChange={(open) =>
+                          setOpenDropdowns((prev) => ({ ...prev, [item.title]: open }))
+                        }
+                        className="group/collapsible"
+                      >
+                        <SidebarMenuItem>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuButton
+                              isActive={false}
+                              tooltip={item.title}
+                              className={cn(
+                                "flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer",
+                                isParentActive
+                                  ? "text-white font-medium bg-slate-800/40"
+                                  : "text-slate-200 hover:text-white hover:bg-slate-800/40"
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                <item.icon
+                                  className={cn(
+                                    "h-4.5 w-4.5 shrink-0 transition-colors",
+                                    isParentActive ? "text-emerald-400" : "text-slate-400"
+                                  )}
+                                />
+                                <span className="text-sm font-medium">{item.title}</span>
+                              </div>
+                              <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-slate-400 group-data-[collapsible=icon]:hidden" />
+                            </SidebarMenuButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub className="my-1 border-l border-slate-800 ml-4 pl-2 space-y-1">
+                              {item.subItems.map((subItem) => {
+                                const isSubActive = isSubItemActive(subItem.url);
+                                return (
+                                  <SidebarMenuSubItem key={subItem.url}>
+                                    <SidebarMenuSubButton asChild isActive={isSubActive}>
+                                      <Link
+                                        to={subItem.url}
+                                        className={cn(
+                                          "flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors",
+                                          isSubActive
+                                            ? "bg-emerald-500/15 text-emerald-400 font-semibold border border-emerald-500/30"
+                                            : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
+                                        )}
+                                      >
+                                        <span
+                                          className={cn(
+                                            "h-1.5 w-1.5 rounded-full shrink-0 transition-colors",
+                                            isSubActive
+                                              ? "bg-emerald-400 ring-2 ring-emerald-400/20"
+                                              : "bg-slate-500"
+                                          )}
+                                        />
+                                        <span>{subItem.title}</span>
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                );
+                              })}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </SidebarMenuItem>
+                      </Collapsible>
+                    );
+                  }
+
+                  return (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                        <Link to={item.url} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-200 hover:text-white rounded-lg transition-colors">
+                          <item.icon className="h-4.5 w-4.5 shrink-0" />
+                          <span className="text-sm font-medium">{item.title}</span>
+                          {item.url === "/workforce/verification" && pendingCount > 0 && (
+                            <div className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white group-data-[collapsible=icon]:hidden shadow-xs">
+                              {pendingCount}
+                            </div>
                           )}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                          {item.url === "/bookings" && unreadBookingsCount > 0 && (
+                            <div className="ml-auto flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white group-data-[collapsible=icon]:hidden shadow-xs animate-in fade-in zoom-in-75">
+                              {unreadBookingsCount > 99 ? "99+" : unreadBookingsCount}
+                            </div>
+                          )}
+                          {isActive(item.url) &&
+                            !(item.url === "/workforce/verification" && pendingCount > 0) &&
+                            !(item.url === "/bookings" && unreadBookingsCount > 0) && (
+                              <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
+                            )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
