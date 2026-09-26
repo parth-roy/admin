@@ -37,7 +37,7 @@ function WorkforceBookingsPage() {
                 gigs?.map((gig: any) => (
                   <TableRow key={gig.id} className="hover:bg-slate-50/50 transition-colors">
                     <TableCell>
-                      <Link to={`/workforce-bookings/${gig.id}`} className="font-bold text-primary hover:underline">
+                      <Link to="/workforce-bookings/$id" params={{ id: gig.id }} className="font-bold text-primary hover:underline">
                         {gig.jobNumber}
                       </Link>
                       <div className="text-xs text-muted-foreground">{new Date(gig.createdAt).toLocaleString()}</div>

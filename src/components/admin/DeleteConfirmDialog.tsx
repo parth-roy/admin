@@ -19,7 +19,7 @@ interface DeleteConfirmDialogProps {
   onOpenChange: (open: boolean) => void;
   entityLabel: string;
   entityName: string;
-  onSoftDelete: (reason: string) => Promise<void>;
+  onSoftDelete?: (reason: string) => Promise<void>;
   onHardDelete: (reason: string) => Promise<void>;
   softDeleteLabel?: string;
   isLoading?: boolean;
@@ -49,7 +49,7 @@ export function DeleteConfirmDialog({
   };
 
   const handleSoft = async () => {
-    if (!reason.trim()) return;
+    if (!reason.trim() || !onSoftDelete) return;
     setLoading(true);
     try {
       await onSoftDelete(reason.trim());

@@ -611,7 +611,7 @@ function Dashboard() {
                         DL: {d.licenseNumber || "Pending"} · {d.user?.phone}
                       </p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        Vehicle: {d.vehicle?.vehicleNumber || "Not registered"} ({d.vehicle?.type?.replace(/_/g, ' ') || 'N/A'})
+                        Vehicle: {(d.vehicle as any)?.registrationNo || (d.vehicle as any)?.vehicleNumber || "Not registered"} ({d.vehicle?.type?.replace(/_/g, ' ') || 'N/A'})
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

@@ -42,7 +42,7 @@ export const Route = createFileRoute("/agents/")({
   component: TransportAgentsPage,
 });
 
-export default function TransportAgentsPage() {
+function TransportAgentsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");

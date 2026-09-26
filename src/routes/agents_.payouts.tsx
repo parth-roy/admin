@@ -1,11 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import BrokerBountiesPage from "./broker-bounties";
+import { BrokerBountiesView } from "@/components/admin/BrokerBountiesView";
 
 export const Route = createFileRoute("/agents_/payouts")({
   head: () => ({ meta: [{ title: "Agent Payouts & Bounties — SUPER ADMIN" }] }),
-  component: AgentPayoutsRoute,
+  component: BrokerBountiesView,
 });
-
-export default function AgentPayoutsRoute() {
-  return <BrokerBountiesPage />;
-}

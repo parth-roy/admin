@@ -145,9 +145,16 @@ export interface BookingListItem {
   customer: { id: string; name: string | null; phone: string };
   driver: { user: { name: string | null; phone: string } } | null;
   driverId: string | null;
+  bookingPersona?: "INDIVIDUAL" | "ENTERPRISE" | "CONTRACTUAL";
+  truckCount?: number;
+  contractDuration?: string | null;
+  urgencyWindow?: string;
+  slaExpiresAt?: string | null;
   hasAgentDriver?: boolean;
   agentDriverCount?: number;
   agentDriverDetails?: AgentDriverDetails | null;
+  pickupAddress?: string;
+  grandTotal?: number;
 }
 
 export interface BookingStop {

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/agents_/register")({
   component: ManualAgentRegistrationPage,
 });
 
-export default function ManualAgentRegistrationPage() {
+function ManualAgentRegistrationPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

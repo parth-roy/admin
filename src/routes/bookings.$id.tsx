@@ -265,10 +265,10 @@ function BookingDetail() {
                 const isAudit = b.pricingAuditLog && b.pricingAuditLog.length > 0;
                 const hasEarning = !!b.earning;
                 
-                const base = isAudit ? b.pricingAuditLog[0].totalFare : b.totalFare ?? 0;
+                const base = isAudit && b.pricingAuditLog ? b.pricingAuditLog[0].totalFare : b.totalFare ?? 0;
                 const gst = b.gstAmount ?? 0;
-                const commission = isAudit ? b.pricingAuditLog[0].commissionAmount : (hasEarning ? b.earning.commission : 0);
-                let driverNet = isAudit ? b.pricingAuditLog[0].driverPayout : (hasEarning ? b.earning.netAmount : null);
+                const commission = isAudit && b.pricingAuditLog ? b.pricingAuditLog[0].commissionAmount : (hasEarning && b.earning ? b.earning.commission : 0);
+                let driverNet = isAudit && b.pricingAuditLog ? b.pricingAuditLog[0].driverPayout : (hasEarning && b.earning ? b.earning.netAmount : null);
                 
                 // Fallback math if driverNet is not explicitly stored
                 if (driverNet === null) {

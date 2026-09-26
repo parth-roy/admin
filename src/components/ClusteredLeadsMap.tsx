@@ -223,6 +223,7 @@ export default function ClusteredLeadsMap({
     if (!source) return;
 
     const bounds = map.current.getBounds();
+    if (!bounds) return;
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
 

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Download, Filter, Search, ChevronLeft, ChevronRight, Loader2, CheckCheck, Zap } from "lucide-react";
 import { PageHeader } from "@/components/admin/AdminTopbar";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,12 @@ function BookingsPage() {
   const [agentSourcedOnly, setAgentSourcedOnly] = useState(false);
   const [selectedAgentDriverBooking, setSelectedAgentDriverBooking] = useState<BookingListItem | null>(null);
   const debouncedSearch = useDebounce(search, 400);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const { isBookingUnread, markAsSeen, markAllAsSeen, unreadCount } = useUnreadBookings();
 
@@ -232,8 +238,46 @@ function BookingsPage() {
                             <span className="text-warning-foreground bg-warning/20 rounded px-2 py-0.5 text-xs">Unassigned</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {fmtDate(b.createdAt)}
+                        <TableCell className="text-xs">
+                          <div className="text-muted-foreground font-medium">{fmtDate(b.createdAt)}</div>
+                          
+                          {/* SLA Timer & Persona Display */}
+                          {b.slaExpiresAt && (() => {
+                            const expiry = new Date(b.slaExpiresAt).getTime();
+                            const remaining = expiry - now;
+                            const isExpired = remaining <= 0;
+                            
+                            if (isExpired) {
+                              return (
+                                <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[10px] font-black uppercase tracking-tight">
+                                  <span>⚠️ SLA EXPIRED</span>
+                                </div>
+                              );
+                            }
+
+                            const hours = Math.floor(remaining / 3600000);
+                            const mins = Math.floor((remaining % 3600000) / 60000);
+                            const secs = Math.floor((remaining % 60000) / 1000);
+                            const timeStr = `${hours > 0 ? `${hours}h ` : ""}${String(mins).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s left`;
+
+                            return (
+                              <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] font-black tabular-nums animate-pulse">
+                                <span>⏱️ {timeStr}</span>
+                              </div>
+                            );
+                          })()}
+
+                          {/* Persona badge if Enterprise or Contractual */}
+                          {b.bookingPersona === "ENTERPRISE" && (
+                            <div className="mt-0.5 text-[9px] font-bold text-purple-600 dark:text-purple-400">
+                              🏢 Enterprise ({b.truckCount || 1} Trucks)
+                            </div>
+                          )}
+                          {b.bookingPersona === "CONTRACTUAL" && (
+                            <div className="mt-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400">
+                              📋 Contractual
+                            </div>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
                           {b.hasAgentDriver ? (
