@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
-import { Download, Filter, Search, ChevronLeft, ChevronRight, Loader2, CheckCheck } from "lucide-react";
+import { Download, Filter, Search, ChevronLeft, ChevronRight, Loader2, CheckCheck, Zap } from "lucide-react";
 import { PageHeader } from "@/components/admin/AdminTopbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { AgentDriverModal } from "@/components/admin/AgentDriverModal";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -31,17 +32,20 @@ function BookingsPage() {
   const [status, setStatus] = useState<string>("all");
   const [vehicleType, setVehicleType] = useState<string>("all-vt");
   const [paymentStatus, setPaymentStatus] = useState<string>("all-pay");
+  const [agentSourcedOnly, setAgentSourcedOnly] = useState(false);
+  const [selectedAgentDriverBooking, setSelectedAgentDriverBooking] = useState<BookingListItem | null>(null);
   const debouncedSearch = useDebounce(search, 400);
 
   const { isBookingUnread, markAsSeen, markAllAsSeen, unreadCount } = useUnreadBookings();
 
-  const { data, isLoading, isFetching } = useBookings({
+  const { data, isLoading, isFetching, refetch } = useBookings({
     page,
     limit: 25,
     search: debouncedSearch || undefined,
     status: status !== "all" ? (status as BookingStatus) : undefined,
     vehicleType: vehicleType !== "all-vt" ? (vehicleType as VehicleType) : undefined,
     paymentStatus: paymentStatus !== "all-pay" ? (paymentStatus as PaymentStatus) : undefined,
+    hasAgentDriver: agentSourcedOnly ? true : undefined,
   });
 
   const total = data?.total ?? 0;
@@ -98,6 +102,7 @@ function BookingsPage() {
               <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="AGENT_SOURCED">⚡ Agent Sourced Only</SelectItem>
                 <SelectItem value="CONFIRMED">Confirmed</SelectItem>
                 <SelectItem value="DRIVER_ASSIGNED">Driver Assigned</SelectItem>
                 <SelectItem value="IN_TRANSIT">In Transit</SelectItem>
@@ -126,6 +131,29 @@ function BookingsPage() {
                 <SelectItem value="FAILED">Failed</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Quick Agent Sourced Filter Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setAgentSourcedOnly(prev => !prev);
+                setPage(1);
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-md border transition-all cursor-pointer ${
+                agentSourcedOnly
+                  ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.3)] ring-1 ring-amber-500/50"
+                  : "bg-background text-muted-foreground border-input hover:bg-accent hover:text-accent-foreground"
+              }`}
+              title="Filter to show only bookings where an agent has submitted driver and truck details"
+            >
+              <Zap className={`h-3.5 w-3.5 ${agentSourcedOnly ? "text-amber-500 fill-amber-500 animate-pulse" : "text-amber-500/70"}`} />
+              <span>Agent Sourced Only</span>
+              {agentSourcedOnly && (
+                <span className="ml-1 px-1.5 py-0.2 bg-amber-500 text-white text-[10px] font-black rounded-full">
+                  ON
+                </span>
+              )}
+            </button>
           </div>
         </Card>
 
@@ -149,13 +177,14 @@ function BookingsPage() {
                   <TableHead>Payment</TableHead>
                   <TableHead>Driver</TableHead>
                   <TableHead>Created</TableHead>
+                  <TableHead className="text-right min-w-[180px]">Agent Sourcing</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   Array.from({ length: 10 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 9 }).map((_, j) => (
+                      {Array.from({ length: 10 }).map((_, j) => (
                         <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                       ))}
                     </TableRow>
@@ -206,12 +235,30 @@ function BookingsPage() {
                         <TableCell className="text-xs text-muted-foreground">
                           {fmtDate(b.createdAt)}
                         </TableCell>
+                        <TableCell className="text-right">
+                          {b.hasAgentDriver ? (
+                            <button
+                              onClick={() => setSelectedAgentDriverBooking(b)}
+                              className="relative inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.35)] hover:shadow-[0_0_20px_rgba(245,158,11,0.65)] hover:border-amber-400 transition-all duration-200 cursor-pointer animate-pulse"
+                              title="Driver & Truck details submitted by verified Agent Partner. Click to view."
+                            >
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                              </span>
+                              <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
+                              <span className="whitespace-nowrap tracking-tight">Driver Given by Agent</span>
+                            </button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground/40">—</span>
+                          )}
+                        </TableCell>
                       </TableRow>
                     );
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-12 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="py-12 text-center text-muted-foreground">
                       No bookings found
                     </TableCell>
                   </TableRow>
@@ -237,6 +284,18 @@ function BookingsPage() {
           </div>
         </Card>
       </div>
+
+      {/* Agent Driver Dossier Modal */}
+      <AgentDriverModal
+        booking={selectedAgentDriverBooking}
+        open={!!selectedAgentDriverBooking}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setSelectedAgentDriverBooking(null);
+        }}
+        onAssigned={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 }

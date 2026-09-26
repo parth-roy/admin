@@ -28,6 +28,14 @@ export const bookingsApi = {
     return res.data.data;
   },
 
+  assignAgentDriver: async (bookingId: string, quoteId?: string): Promise<any> => {
+    const res = await apiClient.post<ApiResponse<any>>(
+      `/admin/bookings/${bookingId}/assign-agent-driver`,
+      { quoteId },
+    );
+    return res.data.data;
+  },
+
   cancel: async (bookingId: string, reason: string): Promise<BookingDetail> => {
     const res = await apiClient.post<ApiResponse<BookingDetail>>(
       `/admin/bookings/${bookingId}/cancel`,

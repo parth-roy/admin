@@ -80,6 +80,59 @@ export interface DashboardAlerts {
   subscriptionsExpiring: number;
 }
 
+export interface AgentDriverDetails {
+  quoteId: string;
+  status: string;
+  negotiatedAmount: number;
+  flatFeeBounty: number;
+  isDriverVerified: boolean;
+  createdAt: string;
+  agent: {
+    id: string;
+    name: string;
+    phone: string;
+    primaryCity: string;
+    isKycVerified: boolean;
+  };
+  driver: {
+    name: string;
+    phone: string;
+    altPhone?: string | null;
+    licenseNo?: string | null;
+    licensePhotoUrl?: string | null;
+    aadhaarNo?: string | null;
+    aadhaarPhotoUrl?: string | null;
+    city?: string | null;
+    isOwnerDriver?: boolean;
+    ownerName?: string | null;
+    ownerPhone?: string | null;
+  };
+  truck: {
+    vehicleRegNo: string;
+    vehicleType: string;
+    vehicleBodyType: string;
+    vehicleRcPhotoUrl: string;
+    vehiclePhotoUrl?: string | null;
+    permitType?: string;
+    fitnessValidTill?: string | null;
+    insuranceValidTill?: string | null;
+  };
+  terms: {
+    negotiatedAmount: number;
+    advanceRequired: number;
+    readyToLoadAt: string;
+    agentNotes: string;
+  };
+  load?: {
+    loadId?: string;
+    pickupCity?: string;
+    dropCity?: string;
+    pickupAddress?: string;
+    dropAddress?: string;
+    customerBudget?: number;
+  } | null;
+}
+
 // ── Bookings ──────────────────────────────────────────────────────────────────
 export interface BookingListItem {
   id: string;
@@ -92,6 +145,9 @@ export interface BookingListItem {
   customer: { id: string; name: string | null; phone: string };
   driver: { user: { name: string | null; phone: string } } | null;
   driverId: string | null;
+  hasAgentDriver?: boolean;
+  agentDriverCount?: number;
+  agentDriverDetails?: AgentDriverDetails | null;
 }
 
 export interface BookingStop {
@@ -313,13 +369,14 @@ export interface PaginationParams {
 }
 
 export interface BookingsParams extends PaginationParams {
-  status?: BookingStatus;
+  status?: BookingStatus | string;
   vehicleType?: VehicleType;
   paymentStatus?: PaymentStatus;
   search?: string;
   unassigned?: boolean;
   from?: string;
   to?: string;
+  hasAgentDriver?: boolean;
 }
 
 export interface UsersParams extends PaginationParams {
