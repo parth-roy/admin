@@ -437,3 +437,86 @@ export interface Withdrawal {
   fleet?: { companyName: string; ownerName: string };
   worker?: { name: string; phone: string };
 }
+
+// ── Marketplace / Driver Bids ────────────────────────────────────────────────
+export type MarketplaceBidStatus = 'OPEN' | 'AWARDED' | 'REJECTED' | 'WITHDRAWN' | 'EXPIRED' | 'CLOSED';
+
+export interface DriverBidRevision {
+  id: string;
+  revisionNumber: number;
+  quotedAmount: number;
+  gstAmount: number;
+  customerTotal: number;
+  pickupCommitmentAt: string;
+  transitMinutes: number;
+  vehicleType: VehicleType;
+  inclusions: string[];
+  exclusions: string[];
+  note?: string | null;
+  createdAt: string;
+}
+
+export interface DriverBidListItem {
+  id: string;
+  bookingId: string;
+  bookingNumber: string;
+  pickupAddress: string;
+  dropoffAddress: string;
+  bookingStatus: BookingStatus;
+  bookingEstimatedPrice: number;
+  pickupDate?: string;
+  customerName: string;
+  customerPhone: string;
+
+  driverId: string | null;
+  driverName: string;
+  driverPhone: string;
+  driverRating: number;
+  driverTotalTrips: number;
+  isDocVerified: boolean;
+  vehicleReg: string;
+  vehicleType: VehicleType;
+
+  fleetOwnerCompany?: string | null;
+
+  status: MarketplaceBidStatus;
+  revisionCount: number;
+  latestRevision: DriverBidRevision | null;
+  awardDetails?: any | null;
+  submittedAt: string;
+  withdrawnAt?: string | null;
+  rejectedAt?: string | null;
+  closedAt?: string | null;
+}
+
+export interface DriverBidsStats {
+  total: number;
+  open: number;
+  awarded: number;
+  rejected: number;
+  withdrawn: number;
+  expired: number;
+  closed: number;
+}
+
+export interface DriverBidsResponse {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  stats: DriverBidsStats;
+  data: DriverBidListItem[];
+}
+
+export interface DriverBidsParams extends PaginationParams {
+  search?: string;
+  status?: string;
+  vehicleType?: string;
+  driverId?: string;
+  bookingId?: string;
+  from?: string;
+  to?: string;
+  sortBy?: 'submittedAt' | 'quotedAmount' | 'customerTotal';
+  sortOrder?: 'asc' | 'desc';
+}
+

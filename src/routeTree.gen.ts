@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LiveMapRouteImport } from './routes/live-map'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DriversRouteImport } from './routes/drivers'
+import { Route as DriverBidsRouteImport } from './routes/driver-bids'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as ComplianceRouteImport } from './routes/compliance'
@@ -100,6 +101,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const DriversRoute = DriversRouteImport.update({
   id: '/drivers',
   path: '/drivers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverBidsRoute = DriverBidsRouteImport.update({
+  id: '/driver-bids',
+  path: '/driver-bids',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DispatchRoute = DispatchRouteImport.update({
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
+  '/driver-bids': typeof DriverBidsRoute
   '/drivers': typeof DriversRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/live-map': typeof LiveMapRoute
@@ -353,6 +360,7 @@ export interface FileRoutesByTo {
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
+  '/driver-bids': typeof DriverBidsRoute
   '/drivers': typeof DriversRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/live-map': typeof LiveMapRoute
@@ -403,6 +411,7 @@ export interface FileRoutesById {
   '/compliance': typeof ComplianceRouteWithChildren
   '/customers': typeof CustomersRoute
   '/dispatch': typeof DispatchRoute
+  '/driver-bids': typeof DriverBidsRoute
   '/drivers': typeof DriversRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/live-map': typeof LiveMapRoute
@@ -454,6 +463,7 @@ export interface FileRouteTypes {
     | '/compliance'
     | '/customers'
     | '/dispatch'
+    | '/driver-bids'
     | '/drivers'
     | '/forgot-password'
     | '/live-map'
@@ -503,6 +513,7 @@ export interface FileRouteTypes {
     | '/compliance'
     | '/customers'
     | '/dispatch'
+    | '/driver-bids'
     | '/drivers'
     | '/forgot-password'
     | '/live-map'
@@ -552,6 +563,7 @@ export interface FileRouteTypes {
     | '/compliance'
     | '/customers'
     | '/dispatch'
+    | '/driver-bids'
     | '/drivers'
     | '/forgot-password'
     | '/live-map'
@@ -602,6 +614,7 @@ export interface RootRouteChildren {
   ComplianceRoute: typeof ComplianceRouteWithChildren
   CustomersRoute: typeof CustomersRoute
   DispatchRoute: typeof DispatchRoute
+  DriverBidsRoute: typeof DriverBidsRoute
   DriversRoute: typeof DriversRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LiveMapRoute: typeof LiveMapRoute
@@ -707,6 +720,13 @@ declare module '@tanstack/react-router' {
       path: '/drivers'
       fullPath: '/drivers'
       preLoaderRoute: typeof DriversRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver-bids': {
+      id: '/driver-bids'
+      path: '/driver-bids'
+      fullPath: '/driver-bids'
+      preLoaderRoute: typeof DriverBidsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dispatch': {
@@ -998,6 +1018,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComplianceRoute: ComplianceRouteWithChildren,
   CustomersRoute: CustomersRoute,
   DispatchRoute: DispatchRoute,
+  DriverBidsRoute: DriverBidsRoute,
   DriversRoute: DriversRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LiveMapRoute: LiveMapRoute,

@@ -35,6 +35,10 @@ const map: Record<string, string> = {
   IN_PROGRESS: "bg-warning/20 text-warning-foreground border-warning/40",
   RESOLVED: "bg-success/15 text-success border-success/30",
   CLOSED: "bg-muted text-muted-foreground",
+  // bid statuses
+  AWARDED: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+  WITHDRAWN: "bg-muted text-muted-foreground border-border",
+  EXPIRED: "bg-destructive/10 text-destructive border-destructive/30",
   // docs
   VALID: "bg-success/15 text-success border-success/30",
   EXPIRING: "bg-warning/20 text-warning-foreground border-warning/40",

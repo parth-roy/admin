@@ -33,6 +33,7 @@ import {
   Shield,
   Layers,
   CreditCard,
+  Gavel,
 } from "lucide-react";
 import {
   Sidebar,
@@ -99,6 +100,7 @@ const sections: MenuSection[] = [
     label: "Operations",
     items: [
       { title: "All Bookings", url: "/bookings", icon: ClipboardList, domain: "gomytruck" },
+      { title: "Driver Bids", url: "/driver-bids", icon: Gavel, domain: "gomytruck" },
       { title: "Manual Bookings", url: "/manual-bookings", icon: Truck, domain: "gomytruck" },
       { title: "Workforce Bookings", url: "/workforce-bookings", icon: ClipboardList, domain: "metromitra" },
       // { title: "Dispatch Queue", url: "/dispatch", icon: Radio, domain: "gomytruck" },
