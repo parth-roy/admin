@@ -520,3 +520,76 @@ export interface DriverBidsParams extends PaginationParams {
   sortOrder?: 'asc' | 'desc';
 }
 
+// ── Dispatch Alerts & Telemetry Audit ─────────────────────────────────────────
+
+export type DriverActionType =
+  | 'DETAILS_VIEWED'
+  | 'CONTACT_UNMASKED'
+  | 'PHONE_CALL_INITIATED'
+  | 'WHATSAPP_CLICKED'
+  | 'BID_SUBMITTED'
+  | 'INSTANT_ACCEPTED'
+  | 'LOAD_DECLINED';
+
+export type DispatchAlertSeverity =
+  | 'INFO'
+  | 'WARNING'
+  | 'CRITICAL_TIMEOUT'
+  | 'SUSPECTED_DISINTERMEDIATION';
+
+export interface AdminDispatchAlertItem {
+  id: string;
+  bookingId: string;
+  severity: DispatchAlertSeverity;
+  reason: string;
+  isResolved: boolean;
+  resolvedByAdminId?: string | null;
+  resolvedAt?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  booking: {
+    id: string;
+    bookingNumber: string;
+    pickupAddress: string;
+    dropAddress: string;
+    totalFare: number;
+    vehicleType: string;
+    status: string;
+    bookingChannel?: string;
+    dispatchedAt?: string | null;
+    dispatchTimeoutAt?: string | null;
+    isOpsEscalated: boolean;
+    customer?: { id: string; name: string | null; phone: string } | null;
+    driver?: {
+      id: string;
+      user: { name: string | null; phone: string };
+      vehicle?: { registrationNo: string | null } | null;
+    } | null;
+  };
+}
+
+export interface DriverEngagementAuditItem {
+  id: string;
+  bookingId: string;
+  driverId: string;
+  action: DriverActionType;
+  driverLat?: number | null;
+  driverLng?: number | null;
+  metadata?: Record<string, any> | null;
+  createdAt: string;
+  driver: {
+    id: string;
+    user: { id: string; name: string | null; phone: string };
+    vehicle?: { id: string; registrationNo: string; type: string } | null;
+  };
+  booking?: {
+    id: string;
+    bookingNumber: string;
+    pickupAddress: string;
+    dropAddress: string;
+    totalFare: number;
+    status: string;
+    customer?: { id: string; name: string | null; phone: string } | null;
+  } | null;
+}
+

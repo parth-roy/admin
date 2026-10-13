@@ -103,7 +103,7 @@ const sections: MenuSection[] = [
       { title: "Driver Bids", url: "/driver-bids", icon: Gavel, domain: "gomytruck" },
       { title: "Manual Bookings", url: "/manual-bookings", icon: Truck, domain: "gomytruck" },
       { title: "Workforce Bookings", url: "/workforce-bookings", icon: ClipboardList, domain: "metromitra" },
-      // { title: "Dispatch Queue", url: "/dispatch", icon: Radio, domain: "gomytruck" },
+      { title: "Dispatch & Ops Alerts", url: "/dispatch", icon: Radio, domain: "gomytruck" },
       { title: "Driver Verification", url: "/verification", icon: ShieldCheck, domain: "gomytruck" },
       { title: "Workforce Verification", url: "/workforce/verification", icon: FileCheck2, domain: "metromitra" },
     ],
