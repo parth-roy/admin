@@ -80,7 +80,21 @@ function WorkforceVerificationPage() {
                       <span className="text-xs font-semibold uppercase text-muted-foreground">{doc.type}</span>
                       <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="block relative group rounded-md overflow-hidden border">
                         <div className="aspect-square bg-slate-100 flex items-center justify-center">
-                          <img src={doc.fileUrl} alt={doc.type} className="w-full h-full object-cover" />
+                          {doc.fileUrl?.toLowerCase().includes('.pdf') ? (
+                            <div className="flex flex-col items-center justify-center p-2 text-center text-slate-600">
+                              <FileImage className="h-8 w-8 text-red-500 mb-1" />
+                              <span className="text-[10px] font-bold">PDF Document</span>
+                            </div>
+                          ) : (
+                            <img
+                              src={doc.fileUrl}
+                              alt={doc.type}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          )}
                         </div>
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <FileImage className="text-white h-6 w-6" />
