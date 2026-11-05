@@ -30,6 +30,18 @@ export const driversApi = {
     return res.data.data;
   },
 
+  convertLead: async (leadId: string): Promise<{ success: boolean; driverId: string; userId: string; name: string; phone: string; isDocVerified: boolean }> => {
+    const cleanId = leadId.replace(/^lead_/, '');
+    const res = await apiClient.post<ApiResponse<{ success: boolean; driverId: string; userId: string; name: string; phone: string; isDocVerified: boolean }>>(`/admin/drivers/convert-lead/${cleanId}`);
+    return res.data.data;
+  },
+
+  rejectLead: async (leadId: string, reason?: string): Promise<{ success: boolean; leadId: string }> => {
+    const cleanId = leadId.replace(/^lead_/, '');
+    const res = await apiClient.post<ApiResponse<{ success: boolean; leadId: string }>>(`/admin/drivers/reject-lead/${cleanId}`, { reason });
+    return res.data.data;
+  },
+
   getVerificationLogs: async (driverId: string): Promise<VerificationLog[]> => {
     const res = await apiClient.get<ApiResponse<VerificationLog[]>>(`/admin/drivers/${driverId}/verification-logs`);
     return res.data.data;

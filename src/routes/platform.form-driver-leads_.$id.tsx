@@ -4,7 +4,7 @@ import { apiClient as api } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, CheckCircle, XCircle, FileImage, ExternalLink } from 'lucide-react';
+import { Loader2, ArrowLeft, CheckCircle, XCircle, FileImage, ExternalLink, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import LeadLocationMap from '@/components/LeadLocationMap';
@@ -35,6 +35,20 @@ function FormDriverLeadDetailPage() {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Error updating status');
+    },
+  });
+
+  const convertMutation = useMutation({
+    mutationFn: async () => {
+      await api.post(`/admin/drivers/convert-lead/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['form-driver-leads'] });
+      queryClient.invalidateQueries({ queryKey: ['drivers'] });
+      toast.success('Lead approved and converted to verified driver account successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error converting lead to driver');
     },
   });
 
@@ -201,40 +215,39 @@ function FormDriverLeadDetailPage() {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
-              {lead.status === 'PENDING' && (
+              {lead.status !== 'CONVERTED' ? (
                 <>
                   <Button 
-                    className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    disabled={updateStatusMutation.isPending}
-                    onClick={() => updateStatusMutation.mutate({ status: 'APPROVED' })}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2"
+                    disabled={convertMutation.isPending || updateStatusMutation.isPending}
+                    onClick={() => convertMutation.mutate()}
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Approve Lead
+                    {convertMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4 text-yellow-300" />
+                    )}
+                    Approve &amp; Convert to Driver
                   </Button>
-                  <Button 
-                    variant="destructive" 
-                    className="w-full"
-                    disabled={updateStatusMutation.isPending}
-                    onClick={() => updateStatusMutation.mutate({ status: 'REJECTED' })}
-                  >
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Reject Lead
-                  </Button>
-                </>
-              )}
-              {lead.status !== 'PENDING' && (
-                <div className="p-4 bg-slate-50 rounded-lg text-center text-sm text-slate-600">
-                  This lead has been <strong>{lead.status.toLowerCase()}</strong>.
-                  <div className="mt-4">
+                  {lead.status === 'PENDING' && (
                     <Button 
-                      variant="outline" 
+                      variant="destructive" 
                       className="w-full"
-                      disabled={updateStatusMutation.isPending}
-                      onClick={() => updateStatusMutation.mutate({ status: 'PENDING' })}
+                      disabled={convertMutation.isPending || updateStatusMutation.isPending}
+                      onClick={() => updateStatusMutation.mutate({ status: 'REJECTED' })}
                     >
-                      Reset to Pending
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject Lead
                     </Button>
-                  </div>
+                  )}
+                </>
+              ) : (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-center text-sm text-emerald-800 space-y-2">
+                  <CheckCircle className="w-6 h-6 mx-auto text-emerald-600" />
+                  <p className="font-bold">Active &amp; Verified Driver</p>
+                  <p className="text-xs text-emerald-700">
+                    This lead was successfully converted into an active Driver User with full dispatch access.
+                  </p>
                 </div>
               )}
             </CardContent>

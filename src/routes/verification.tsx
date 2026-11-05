@@ -5,7 +5,7 @@ import {
   Loader2, CheckCircle2, XCircle, FileText, ExternalLink,
   ZoomIn, ZoomOut, RotateCw, RefreshCw, Eye, AlertTriangle,
   User, Phone, Car, Calendar, Copy, Check, Users, Sparkles,
-  FileQuestion,
+  FileQuestion, MapPin, Globe,
 } from "lucide-react";
 import { PageHeader } from "@/components/admin/AdminTopbar";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { useDrivers, useUpdateDocStatus, useSetDocVerified } from "@/hooks/useDrivers";
+import { useDrivers, useUpdateDocStatus, useSetDocVerified, useConvertLead, useRejectLead } from "@/hooks/useDrivers";
 import type { DriverListItem, DriverDocument } from "@/lib/api/types";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -188,9 +188,31 @@ function VerificationPage() {
 
   const docStatusMut = useUpdateDocStatus();
   const docVerifiedMut = useSetDocVerified();
+  const convertLeadMut = useConvertLead();
+  const rejectLeadMut = useRejectLead();
 
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 10);
+
+  // Approve & Convert website onboarding lead to full verified driver
+  const handleConvertWebsiteLead = async (leadId: string, driverName: string) => {
+    try {
+      await convertLeadMut.mutateAsync(leadId);
+      toast.success(`Driver "${driverName}" approved & converted! Profile is now fully verified with live load access.`);
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Failed to convert lead to driver");
+    }
+  };
+
+  // Reject website onboarding lead
+  const handleRejectWebsiteLead = async (leadId: string, driverName: string) => {
+    try {
+      await rejectLeadMut.mutateAsync({ leadId });
+      toast.info(`Website lead "${driverName}" marked as rejected`);
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Failed to reject website lead");
+    }
+  };
 
   // 1-Click Approve single document
   const handleApproveDoc = async (driverId: string, docId: string, docLabel: string) => {
@@ -445,6 +467,14 @@ function VerificationPage() {
                 }
                 onInspectDoc={(doc, docLabel) => openLightbox(driver, doc, docLabel)}
                 isDocMutating={docStatusMut.isPending}
+                onConvertWebsiteLead={() =>
+                  handleConvertWebsiteLead(driver.leadId || driver.id.replace(/^lead_/, ""), driver.user?.name ?? "Driver")
+                }
+                onRejectWebsiteLead={() =>
+                  handleRejectWebsiteLead(driver.leadId || driver.id.replace(/^lead_/, ""), driver.user?.name ?? "Driver")
+                }
+                isConverting={convertLeadMut.isPending}
+                isRejecting={rejectLeadMut.isPending}
               />
             ))}
 
@@ -779,6 +809,10 @@ interface DriverCardProps {
   onRejectDoc: (docId: string, docLabel: string) => void;
   onInspectDoc: (doc: DriverDocument, docLabel: string) => void;
   isDocMutating: boolean;
+  onConvertWebsiteLead?: () => void;
+  onRejectWebsiteLead?: () => void;
+  isConverting?: boolean;
+  isRejecting?: boolean;
 }
 
 function DriverVerificationCard({
@@ -790,6 +824,10 @@ function DriverVerificationCard({
   onRejectDoc,
   onInspectDoc,
   isDocMutating,
+  onConvertWebsiteLead,
+  onRejectWebsiteLead,
+  isConverting,
+  isRejecting,
 }: DriverCardProps) {
   const [copied, setCopied] = useState(false);
 
@@ -830,13 +868,13 @@ function DriverVerificationCard({
     : "—";
 
   return (
-    <Card className="overflow-hidden border shadow-sm transition-all hover:shadow-md">
+    <Card className={`overflow-hidden border shadow-sm transition-all hover:shadow-md ${driver.source === 'WEBSITE' ? 'border-purple-300/80 bg-gradient-to-b from-purple-50/20 to-transparent' : ''}`}>
       {/* Top Header Row with Driver Details */}
       <div className="bg-card p-5 border-b space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Driver Avatar & Identity */}
           <div className="flex items-start sm:items-center gap-4">
-            <div className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-primary/20 bg-muted shrink-0 shadow-xs">
+            <div className={`relative h-14 w-14 rounded-full overflow-hidden border-2 bg-muted shrink-0 shadow-xs ${driver.source === 'WEBSITE' ? 'border-purple-400/50' : 'border-primary/20'}`}>
               {selfieDoc?.fileUrl ? (
                 <img
                   src={selfieDoc.fileUrl}
@@ -847,7 +885,7 @@ function DriverVerificationCard({
                   }}
                 />
               ) : (
-                <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
+                <div className={`h-full w-full flex items-center justify-center font-bold text-lg ${driver.source === 'WEBSITE' ? 'bg-purple-100 text-purple-700' : 'bg-primary/10 text-primary'}`}>
                   {driver.user?.name ? driver.user.name.substring(0, 2).toUpperCase() : "DR"}
                 </div>
               )}
@@ -858,6 +896,12 @@ function DriverVerificationCard({
                 <h3 className="text-lg font-bold text-foreground">
                   {driver.user?.name ?? "Unnamed Driver"}
                 </h3>
+                {driver.source === "WEBSITE" && (
+                  <Badge className="bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs gap-1 py-0.5 shadow-xs">
+                    <Globe className="h-3.5 w-3.5" />
+                    Website Onboarding
+                  </Badge>
+                )}
                 {driver.isDocVerified ? (
                   <Badge className="bg-emerald-600 text-white font-medium text-xs gap-1 py-0.5">
                     <ShieldCheck className="h-3.5 w-3.5" />
@@ -908,9 +952,41 @@ function DriverVerificationCard({
             </div>
           </div>
 
-          {/* Right Action: Prominent "Approve Driver & Grant Access" button */}
+          {/* Right Action: "Approve & Convert" for website leads, or "Approve Driver & Grant Access" for regular app drivers */}
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
-            {driver.isDocVerified ? (
+            {driver.source === "WEBSITE" ? (
+              <div className="flex items-center gap-2">
+                {onRejectWebsiteLead && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs text-destructive hover:bg-destructive/10 border-destructive/30"
+                    disabled={isConverting || isRejecting}
+                    onClick={onRejectWebsiteLead}
+                    title="Reject website lead"
+                  >
+                    <XCircle className="h-4 w-4 mr-1.5" />
+                    Reject
+                  </Button>
+                )}
+                {onConvertWebsiteLead && (
+                  <Button
+                    size="default"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md gap-2 px-5 cursor-pointer animate-in fade-in"
+                    disabled={isConverting}
+                    onClick={onConvertWebsiteLead}
+                    title="Automatically provisions verified driver user account, marks all documents approved, and enables immediate mobile app login"
+                  >
+                    {isConverting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 text-yellow-300" />
+                    )}
+                    Approve &amp; Convert
+                  </Button>
+                )}
+              </div>
+            ) : driver.isDocVerified ? (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-700 font-medium text-xs">
                   <ShieldCheck className="h-4 w-4 text-emerald-600" />
@@ -939,13 +1015,13 @@ function DriverVerificationCard({
                 ) : (
                   <ShieldCheck className="h-5 w-5" />
                 )}
-                Approve Driver & Grant Access
+                Approve Driver &amp; Grant Access
               </Button>
             )}
           </div>
         </div>
 
-        {/* Driver Meta Bar: Vehicle, DL, and Compliance Score */}
+        {/* Driver Meta Bar: Vehicle, DL, and Location / Compliance Score */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t bg-muted/20 -mx-5 -mb-5 px-5 py-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
@@ -978,26 +1054,49 @@ function DriverVerificationCard({
 
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-              <Sparkles className="h-3 w-3" /> Compliance Score
+              {driver.source === "WEBSITE" ? <MapPin className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
+              {driver.source === "WEBSITE" ? "Operating Hub / City" : "Compliance Score"}
             </p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-sm font-bold text-foreground">
-                {driver.complianceScore !== undefined ? `${driver.complianceScore}%` : "—"}
-              </p>
-              <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${
-                    (driver.complianceScore ?? 0) >= 80
-                      ? "bg-emerald-500"
-                      : (driver.complianceScore ?? 0) >= 50
-                        ? "bg-amber-500"
-                        : "bg-destructive"
-                  }`}
-                  style={{ width: `${driver.complianceScore ?? 0}%` }}
-                />
+            {driver.source === "WEBSITE" ? (
+              <div className="mt-0.5">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  {driver.websiteLeadDetails?.city || "Website Lead"}
+                  {driver.websiteLeadDetails?.state ? `, ${driver.websiteLeadDetails.state}` : ""}
+                </p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  {driver.websiteLeadDetails?.isLocationVerified ? (
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30 text-[10px] py-0">
+                      GPS Verified
+                    </Badge>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground">
+                      {driver.websiteLeadDetails?.transportHub || "Standard Verification"}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Automated KYC checklist</p>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-sm font-bold text-foreground">
+                    {driver.complianceScore !== undefined ? `${driver.complianceScore}%` : "—"}
+                  </p>
+                  <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${
+                        (driver.complianceScore ?? 0) >= 80
+                          ? "bg-emerald-500"
+                          : (driver.complianceScore ?? 0) >= 50
+                            ? "bg-amber-500"
+                            : "bg-destructive"
+                      }`}
+                      style={{ width: `${driver.complianceScore ?? 0}%` }}
+                    />
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Automated KYC checklist</p>
+              </>
+            )}
           </div>
 
           <div>

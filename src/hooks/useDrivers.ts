@@ -69,6 +69,27 @@ export function useSetDocVerified() {
   });
 }
 
+export function useConvertLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (leadId: string) => driversApi.convertLead(leadId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+    },
+  });
+}
+
+export function useRejectLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ leadId, reason }: { leadId: string; reason?: string }) =>
+      driversApi.rejectLead(leadId, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+    },
+  });
+}
+
 export function useBlockDriver() {
   const qc = useQueryClient();
   return useMutation({

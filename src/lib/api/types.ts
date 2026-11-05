@@ -236,6 +236,20 @@ export interface DriverListItem {
   subscription: DriverSubscription | null;
   documents: DriverDocument[];
   complianceScore?: number;
+  source?: 'APP' | 'WEBSITE';
+  leadId?: string;
+  websiteLeadDetails?: {
+    city?: string;
+    state?: string;
+    alternatePhone?: string | null;
+    transportHub?: string | null;
+    aadharNumber?: string;
+    givenAddress?: string | null;
+    autoAddress?: string | null;
+    isLocationVerified?: boolean;
+    locationDistance?: number | null;
+    status?: string;
+  };
 }
 
 export interface DriverEarning {

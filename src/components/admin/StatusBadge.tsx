@@ -42,7 +42,6 @@ const map: Record<string, string> = {
   // docs
   VALID: "bg-success/15 text-success border-success/30",
   EXPIRING: "bg-warning/20 text-warning-foreground border-warning/40",
-  EXPIRED: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 export function StatusBadge({ status }: { status?: string | null }) {
