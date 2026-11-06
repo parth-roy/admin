@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ShieldCheck, ShieldAlert, Clock, Search, ChevronLeft, ChevronRight,
@@ -142,7 +142,7 @@ const REJECTION_PRESETS = [
   "Tampered or edited image detected",
 ];
 
-type TabType = "pending" | "all" | "verified";
+type TabType = "all" | "website" | "app";
 
 interface LightboxState {
   driver: DriverListItem;
@@ -151,7 +151,7 @@ interface LightboxState {
 }
 
 function VerificationPage() {
-  const [activeTab, setActiveTab] = useState<TabType>("pending");
+  const [activeTab, setActiveTab] = useState<TabType>("all");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
@@ -170,26 +170,35 @@ function VerificationPage() {
   } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
-  // Queries for drivers list based on active tab
-  const isDocVerifiedParam =
-    activeTab === "pending" ? false : activeTab === "verified" ? true : undefined;
-
+  // Strictly query pending/unverified items. Already created and verified drivers are excluded from this page.
   const { data, isLoading, isFetching } = useDrivers({
     page,
     limit: 10,
     search: debouncedSearch || undefined,
-    isDocVerified: isDocVerifiedParam,
+    isDocVerified: false,
   });
 
-  // Auxiliary queries for live header counters
-  const { data: pendingStats } = useDrivers({ page: 1, limit: 1, isDocVerified: false });
-  const { data: verifiedStats } = useDrivers({ page: 1, limit: 1, isDocVerified: true });
-  const { data: allStats } = useDrivers({ page: 1, limit: 1 });
+  // Auxiliary query for tab counter breakdown of pending items
+  const { data: pendingStats } = useDrivers({ page: 1, limit: 100, isDocVerified: false });
+  const pendingItems = (pendingStats?.data ?? []).filter((d) => !d.isDocVerified);
+  const websiteCount = pendingItems.filter((d) => d.source === "WEBSITE").length;
+  const appCount = pendingItems.filter((d) => d.source !== "WEBSITE").length;
+  const totalPending = pendingStats?.total ?? 0;
 
   const docStatusMut = useUpdateDocStatus();
   const docVerifiedMut = useSetDocVerified();
   const convertLeadMut = useConvertLead();
   const rejectLeadMut = useRejectLead();
+
+  // Strictly exclude already created / verified drivers and leads without documents
+  const displayedDrivers = (data?.data ?? [])
+    .filter((d) => !d.isDocVerified)
+    .filter((d) => d.source !== "WEBSITE" || (Array.isArray(d.documents) && d.documents.length > 0))
+    .filter((d) => {
+      if (activeTab === "website") return d.source === "WEBSITE";
+      if (activeTab === "app") return d.source !== "WEBSITE";
+      return true;
+    });
 
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 10);
@@ -310,7 +319,7 @@ function VerificationPage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-6">
-        {/* KPI Stats Row */}
+        {/* KPI Stats Row: Focused strictly on actionable Verification Queue */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent shadow-xs">
             <CardContent className="p-4 flex items-center gap-4">
@@ -322,44 +331,52 @@ function VerificationPage() {
                   Pending Verification
                 </p>
                 <p className="text-2xl font-bold tracking-tight text-foreground">
-                  {pendingStats?.total ?? "—"}
+                  {totalPending}
                 </p>
-                <p className="text-xs text-amber-600 mt-0.5">Drivers awaiting document review</p>
+                <p className="text-xs text-amber-600 mt-0.5">Drivers awaiting document review & approval</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 to-transparent shadow-xs">
+          <Card className="border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent shadow-xs">
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-emerald-500/15 text-emerald-600">
-                <ShieldCheck className="h-6 w-6" />
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-500/15 text-blue-600">
+                <Globe className="h-6 w-6" />
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Fully Verified
+                  Website Onboardings
                 </p>
                 <p className="text-2xl font-bold tracking-tight text-foreground">
-                  {verifiedStats?.total ?? "—"}
+                  {websiteCount}
                 </p>
-                <p className="text-xs text-emerald-600 mt-0.5">Active with live dispatch access</p>
+                <p className="text-xs text-blue-600 mt-0.5">Awaiting 1-click Approve & Convert</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border shadow-xs">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
-                <Users className="h-6 w-6" />
+          <Card className="border-border shadow-xs hover:border-primary/40 transition-colors">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <Users className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Created Driver Fleet
+                  </p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">
+                    150+ Verified Drivers
+                  </p>
+                  <p className="text-xs text-muted-foreground">Managed in Drivers Directory</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Total Drivers
-                </p>
-                <p className="text-2xl font-bold tracking-tight text-foreground">
-                  {allStats?.total ?? "—"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">Registered driver fleet</p>
-              </div>
+              <Link to="/drivers">
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                  <span>View Fleet</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
@@ -375,28 +392,31 @@ function VerificationPage() {
               }}
               className="w-full md:w-auto"
             >
-              <TabsList className="grid grid-cols-3 w-full md:w-[460px] h-10 p-1">
-                <TabsTrigger value="pending" className="flex items-center gap-2 text-xs sm:text-sm font-medium">
-                  <span>Pending</span>
-                  {pendingStats?.total !== undefined && (
-                    <Badge variant="secondary" className="px-1.5 py-0 h-4.5 text-[10px] bg-amber-500/15 text-amber-700">
-                      {pendingStats.total}
-                    </Badge>
-                  )}
-                </TabsTrigger>
+              <TabsList className="grid grid-cols-3 w-full md:w-[480px] h-10 p-1">
                 <TabsTrigger value="all" className="flex items-center gap-2 text-xs sm:text-sm font-medium">
-                  <span>All Drivers</span>
-                  {allStats?.total !== undefined && (
-                    <Badge variant="secondary" className="px-1.5 py-0 h-4.5 text-[10px]">
-                      {allStats.total}
+                  <Clock className="h-4 w-4" />
+                  <span>All Pending</span>
+                  {totalPending > 0 && (
+                    <Badge variant="secondary" className="px-1.5 py-0 h-4.5 text-[10px] bg-amber-500/15 text-amber-700">
+                      {totalPending}
                     </Badge>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="verified" className="flex items-center gap-2 text-xs sm:text-sm font-medium">
-                  <span>Fully Verified</span>
-                  {verifiedStats?.total !== undefined && (
+                <TabsTrigger value="website" className="flex items-center gap-2 text-xs sm:text-sm font-medium">
+                  <Globe className="h-4 w-4" />
+                  <span>Website Leads</span>
+                  {websiteCount > 0 && (
+                    <Badge variant="secondary" className="px-1.5 py-0 h-4.5 text-[10px] bg-blue-500/15 text-blue-700">
+                      {websiteCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="app" className="flex items-center gap-2 text-xs sm:text-sm font-medium">
+                  <Phone className="h-4 w-4" />
+                  <span>App Signups</span>
+                  {appCount > 0 && (
                     <Badge variant="secondary" className="px-1.5 py-0 h-4.5 text-[10px] bg-emerald-500/15 text-emerald-700">
-                      {verifiedStats.total}
+                      {appCount}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -447,11 +467,9 @@ function VerificationPage() {
               </Card>
             ))}
           </div>
-        ) : (data?.data ?? []).filter((d) => d.source !== "WEBSITE" || (Array.isArray(d.documents) && d.documents.length > 0)).length ? (
+        ) : displayedDrivers.length ? (
           <div className="space-y-6">
-            {(data?.data ?? [])
-              .filter((d) => d.source !== "WEBSITE" || (Array.isArray(d.documents) && d.documents.length > 0))
-              .map((driver: DriverListItem) => (
+            {displayedDrivers.map((driver: DriverListItem) => (
               <DriverVerificationCard
                 key={driver.id}
                 driver={driver}
@@ -483,7 +501,7 @@ function VerificationPage() {
             {/* Pagination footer */}
             <Card className="p-4 flex items-center justify-between shadow-xs">
               <span className="text-sm text-muted-foreground font-medium">
-                Showing {data?.data?.length ?? 0} of {total} driver{total === 1 ? "" : "s"}
+                Showing {displayedDrivers.length} of {total} pending verification{total === 1 ? "" : "s"}
               </span>
               <div className="flex items-center gap-2">
                 <Button
@@ -525,16 +543,16 @@ function VerificationPage() {
                 <CheckCircle2 className="h-8 w-8" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">
-                {activeTab === "pending"
-                  ? "Verification Queue Clear"
-                  : "No Drivers Found"}
+                Verification Queue Clear
               </h3>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                {activeTab === "pending"
-                  ? "All uploaded driver documents have been reviewed. New submissions will appear here automatically."
-                  : search
-                    ? `No drivers matched "${search}". Try searching by phone number, vehicle RC, or licence number.`
-                    : "No drivers available in this filter tab."}
+                {search
+                  ? `No pending verifications matched "${search}".`
+                  : activeTab === "website"
+                    ? "No pending website leads waiting for conversion."
+                    : activeTab === "app"
+                      ? "No pending mobile app driver signups waiting for document review."
+                      : "All uploaded driver documents have been reviewed. New submissions will appear here automatically."}
               </p>
               {search && (
                 <Button variant="outline" size="sm" onClick={() => setSearch("")} className="mt-2">
