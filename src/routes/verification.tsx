@@ -447,9 +447,11 @@ function VerificationPage() {
               </Card>
             ))}
           </div>
-        ) : data?.data?.length ? (
+        ) : (data?.data ?? []).filter((d) => d.source !== "WEBSITE" || (Array.isArray(d.documents) && d.documents.length > 0)).length ? (
           <div className="space-y-6">
-            {data.data.map((driver: DriverListItem) => (
+            {(data?.data ?? [])
+              .filter((d) => d.source !== "WEBSITE" || (Array.isArray(d.documents) && d.documents.length > 0))
+              .map((driver: DriverListItem) => (
               <DriverVerificationCard
                 key={driver.id}
                 driver={driver}
@@ -481,7 +483,7 @@ function VerificationPage() {
             {/* Pagination footer */}
             <Card className="p-4 flex items-center justify-between shadow-xs">
               <span className="text-sm text-muted-foreground font-medium">
-                Showing {data.data.length} of {total} driver{total === 1 ? "" : "s"}
+                Showing {data?.data?.length ?? 0} of {total} driver{total === 1 ? "" : "s"}
               </span>
               <div className="flex items-center gap-2">
                 <Button
