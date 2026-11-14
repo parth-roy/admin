@@ -36,6 +36,14 @@ export function useDriverVerifLogs(id: string) {
   });
 }
 
+export function usePendingDriverVerificationCount() {
+  return useQuery({
+    queryKey: ['pendingDriverDocumentsCount'],
+    queryFn: () => driversApi.getPendingCount(),
+    refetchInterval: 30_000,
+  });
+}
+
 export function useUpdateDocStatus() {
   const qc = useQueryClient();
   return useMutation({
@@ -53,6 +61,7 @@ export function useUpdateDocStatus() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.detail(vars.driverId) });
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+      qc.invalidateQueries({ queryKey: ['pendingDriverDocumentsCount'] });
     },
   });
 }
@@ -65,6 +74,7 @@ export function useSetDocVerified() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.detail(vars.driverId) });
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+      qc.invalidateQueries({ queryKey: ['pendingDriverDocumentsCount'] });
     },
   });
 }
@@ -75,6 +85,7 @@ export function useConvertLead() {
     mutationFn: (leadId: string) => driversApi.convertLead(leadId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+      qc.invalidateQueries({ queryKey: ['pendingDriverDocumentsCount'] });
     },
   });
 }
@@ -86,6 +97,7 @@ export function useRejectLead() {
       driversApi.rejectLead(leadId, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+      qc.invalidateQueries({ queryKey: ['pendingDriverDocumentsCount'] });
     },
   });
 }
@@ -118,6 +130,7 @@ export function useSoftDeleteDriver() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) => driversApi.softDelete(id, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+      qc.invalidateQueries({ queryKey: ['pendingDriverDocumentsCount'] });
     },
   });
 }
@@ -128,6 +141,7 @@ export function useHardDeleteDriver() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) => driversApi.hardDelete(id, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+      qc.invalidateQueries({ queryKey: ['pendingDriverDocumentsCount'] });
     },
   });
 }
@@ -139,6 +153,7 @@ export function useBulkHardDeleteDrivers() {
       driversApi.bulkHardDelete(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: DRIVER_KEYS.all });
+      qc.invalidateQueries({ queryKey: ['pendingDriverDocumentsCount'] });
     },
   });
 }

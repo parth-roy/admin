@@ -66,6 +66,7 @@ import { useAdminWorkspace, type AdminWorkspaceMode } from "@/contexts/workspace
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
 import { useUnreadBookings } from "@/hooks/useUnreadBookings";
+import { usePendingDriverVerificationCount } from "@/hooks/useDrivers";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -226,6 +227,8 @@ export function AppSidebar() {
   });
   const pendingCount = pendingData?.data?.count || 0;
   const { unreadCount: unreadBookingsCount } = useUnreadBookings();
+  const { data: pendingDriverData } = usePendingDriverVerificationCount();
+  const pendingDriverCount = pendingDriverData?.count || 0;
 
   const initials = admin?.name
     ? admin.name
@@ -476,6 +479,11 @@ export function AppSidebar() {
                               {pendingCount}
                             </div>
                           )}
+                          {item.url === "/verification" && pendingDriverCount > 0 && (
+                            <div className="ml-auto flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white group-data-[collapsible=icon]:hidden shadow-xs animate-in fade-in zoom-in-75">
+                              {pendingDriverCount > 99 ? "99+" : pendingDriverCount}
+                            </div>
+                          )}
                           {item.url === "/bookings" && unreadBookingsCount > 0 && (
                             <div className="ml-auto flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white group-data-[collapsible=icon]:hidden shadow-xs animate-in fade-in zoom-in-75">
                               {unreadBookingsCount > 99 ? "99+" : unreadBookingsCount}
@@ -483,6 +491,7 @@ export function AppSidebar() {
                           )}
                           {isActive(item.url) &&
                             !(item.url === "/workforce/verification" && pendingCount > 0) &&
+                            !(item.url === "/verification" && pendingDriverCount > 0) &&
                             !(item.url === "/bookings" && unreadBookingsCount > 0) && (
                               <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
                             )}
