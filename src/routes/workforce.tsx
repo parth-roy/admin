@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   Search, ChevronLeft, ChevronRight, Loader2, Edit, CheckCircle,
   XCircle, Eye, Trash2, X, Wallet, Ban, ShieldCheck, ShieldOff,
+  Download, ChevronDown, FileSpreadsheet,
 } from "lucide-react";
 import { PageHeader } from "@/components/admin/AdminTopbar";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,14 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -31,7 +40,60 @@ import { DeleteConfirmDialog } from "@/components/admin/DeleteConfirmDialog";
 import { BulkDeleteConfirmDialog } from "@/components/admin/BulkDeleteConfirmDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useDebounce } from "@/hooks/useDebounce";
+import { apiClient } from "@/lib/api/client";
 import { toast } from "sonner";
+
+function generateExcelXml(headers: string[], rows: (string | number)[][]): string {
+  const sanitizeXml = (str: any) =>
+    String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Center"/>
+  </Style>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#1E293B" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Workforce">
+  <Table>`;
+
+  xml += '\n   <Row ss:Height="24">';
+  for (const h of headers) {
+    xml += `\n    <Cell ss:StyleID="Header"><Data ss:Type="String">${sanitizeXml(h)}</Data></Cell>`;
+  }
+  xml += "\n   </Row>";
+
+  for (const row of rows) {
+    xml += "\n   <Row>";
+    for (const cell of row) {
+      const isNum = typeof cell === "number" && !isNaN(cell);
+      const type = isNum ? "Number" : "String";
+      xml += `\n    <Cell><Data ss:Type="${type}">${sanitizeXml(cell)}</Data></Cell>`;
+    }
+    xml += "\n   </Row>";
+  }
+
+  xml += `
+  </Table>
+ </Worksheet>
+</Workbook>`;
+  return xml;
+}
 
 export const Route = createFileRoute("/workforce")({
   head: () => ({ meta: [{ title: "Workforce — SUPER ADMIN" }] }),
@@ -54,6 +116,7 @@ function WorkforcePage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectAllFiltered, setSelectAllFiltered] = useState(false);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -143,6 +206,303 @@ function WorkforcePage() {
     }
   };
 
+  const handleExport = async (
+    format: "csv" | "xls" = "csv",
+    scope: "all" | "selected" | "page" = "all"
+  ) => {
+    try {
+      setIsExporting(true);
+      toast.info(
+        `Preparing ${
+          scope === "selected"
+            ? "selected"
+            : scope === "page"
+            ? "page"
+            : "workforce"
+        } data export…`
+      );
+
+      let workersToExport: any[] = [];
+
+      if (scope === "selected") {
+        if (selectedIds.size === 0) {
+          toast.warning("No workers selected to export");
+          setIsExporting(false);
+          return;
+        }
+        if (selectAllFiltered) {
+          const res = await apiClient.get("/admin/workforce", {
+            params: {
+              page: 1,
+              limit: Math.min(Math.max(total, 1), 10000),
+              search: debouncedSearch || undefined,
+              status: workStatus !== "all" ? workStatus : undefined,
+              isDocVerified:
+                docStatus === "verified"
+                  ? true
+                  : docStatus === "unverified"
+                  ? false
+                  : undefined,
+              bankVerified:
+                bankStatus === "verified"
+                  ? true
+                  : bankStatus === "unverified"
+                  ? false
+                  : undefined,
+              isActive:
+                activeStatus === "active"
+                  ? true
+                  : activeStatus === "suspended"
+                  ? false
+                  : undefined,
+            },
+          });
+          workersToExport = res.data?.data?.data || [];
+        } else {
+          const pageWorkers = data?.data || [];
+          const matched = pageWorkers.filter((w: any) => selectedIds.has(w.id));
+          if (matched.length === selectedIds.size) {
+            workersToExport = matched;
+          } else {
+            const res = await apiClient.get("/admin/workforce", {
+              params: {
+                page: 1,
+                limit: Math.min(Math.max(total, 1), 10000),
+                search: debouncedSearch || undefined,
+                status: workStatus !== "all" ? workStatus : undefined,
+                isDocVerified:
+                  docStatus === "verified"
+                    ? true
+                    : docStatus === "unverified"
+                    ? false
+                    : undefined,
+                bankVerified:
+                  bankStatus === "verified"
+                    ? true
+                    : bankStatus === "unverified"
+                    ? false
+                    : undefined,
+                isActive:
+                  activeStatus === "active"
+                    ? true
+                    : activeStatus === "suspended"
+                    ? false
+                    : undefined,
+              },
+            });
+            const allFetched = res.data?.data?.data || [];
+            workersToExport = allFetched.filter((w: any) => selectedIds.has(w.id));
+          }
+        }
+      } else if (scope === "page") {
+        workersToExport = data?.data || [];
+      } else {
+        if (total === 0) {
+          toast.warning("No workforce members found to export");
+          setIsExporting(false);
+          return;
+        }
+        if (data?.data && data.data.length >= total) {
+          workersToExport = data.data;
+        } else {
+          const res = await apiClient.get("/admin/workforce", {
+            params: {
+              page: 1,
+              limit: Math.min(Math.max(total, 1), 10000),
+              search: debouncedSearch || undefined,
+              status: workStatus !== "all" ? workStatus : undefined,
+              isDocVerified:
+                docStatus === "verified"
+                  ? true
+                  : docStatus === "unverified"
+                  ? false
+                  : undefined,
+              bankVerified:
+                bankStatus === "verified"
+                  ? true
+                  : bankStatus === "unverified"
+                  ? false
+                  : undefined,
+              isActive:
+                activeStatus === "active"
+                  ? true
+                  : activeStatus === "suspended"
+                  ? false
+                  : undefined,
+            },
+          });
+          workersToExport = res.data?.data?.data || [];
+        }
+      }
+
+      if (!workersToExport || workersToExport.length === 0) {
+        toast.warning("No workers found to export");
+        setIsExporting(false);
+        return;
+      }
+
+      const headers = [
+        "Worker ID",
+        "User ID",
+        "Full Name",
+        "Phone Number",
+        "Email Address",
+        "Profile Image URL",
+        "Account Status",
+        "Work Status",
+        "Document Verification",
+        "Digilocker Aadhaar Status",
+        "Aadhaar Number (Masked)",
+        "Digilocker PAN Status",
+        "PAN Number",
+        "Uploaded Documents",
+        "Bank Account Verified",
+        "Bank Name",
+        "Bank Account Number",
+        "Bank IFSC Code",
+        "Bank Account Holder Name",
+        "Wallet Balance (INR)",
+        "Rating",
+        "Completed Jobs",
+        "Acceptance Rate (%)",
+        "Preferred Work / Description",
+        "Preferred Work Categories",
+        "Max Lifting Capacity (kg)",
+        "Vehicle Access",
+        "Available Shift / Hours",
+        "Preferred Distance (km)",
+        "Languages Known",
+        "Gamification Tier",
+        "Gamification Points",
+        "Latitude",
+        "Longitude",
+        "Joined / Registered Date",
+        "Last Location Update",
+      ];
+
+      const rows = workersToExport.map((w: any) => {
+        const isSuspended = w.isActive === false || w.user?.isActive === false;
+        const accountStatus = isSuspended ? "Suspended" : "Active";
+        const docStatusText = w.isDocVerified
+          ? "Verified"
+          : w.documents?.some((d: any) => d.status === "PENDING")
+          ? "Pending"
+          : "Unverified";
+        const docsSummary =
+          Array.isArray(w.documents) && w.documents.length > 0
+            ? w.documents
+                .map((d: any) => `${d.type || "DOC"}: ${d.status || "UNKNOWN"}`)
+                .join("; ")
+            : "None";
+        const prefTypes = Array.isArray(w.preferredTypes)
+          ? w.preferredTypes.join(", ")
+          : w.preferredTypes || "";
+        const langs = Array.isArray(w.languages)
+          ? w.languages.join(", ")
+          : w.languages || "";
+
+        return [
+          w.id || "",
+          w.userId || w.user?.id || "",
+          w.user?.name || "Unknown",
+          w.user?.phone || "",
+          w.user?.email || "",
+          w.user?.profileImageUrl || "",
+          accountStatus,
+          w.status || "OFFLINE",
+          docStatusText,
+          w.aadhaarVerifStatus || "PENDING",
+          w.aadhaarNumber ? `'${w.aadhaarNumber}` : "",
+          w.panVerifStatus || "PENDING",
+          w.panNumber || "",
+          docsSummary,
+          w.bankVerified ? "Verified" : "Unverified",
+          w.bankName || "",
+          w.bankAccountNo ? `'${w.bankAccountNo}` : "",
+          w.bankIfsc || "",
+          w.bankAccountHolderName || "",
+          Number(w.workerWallet?.cachedBalance ?? 0),
+          Number(w.rating ?? 5.0),
+          Number(w._count?.jobAssignments ?? w.totalJobs ?? 0),
+          Number(w.acceptanceRate ?? 100),
+          w.preferredWork || "",
+          prefTypes,
+          Number(w.maxWeightKg ?? 100),
+          w.vehicleAccess ? "Yes" : "No",
+          w.availableTime || "",
+          Number(w.preferredDistance ?? 25),
+          langs,
+          w.gamificationTier || "BRONZE",
+          Number(w.gamificationPoints ?? 0),
+          w.currentLat != null ? Number(w.currentLat) : "",
+          w.currentLng != null ? Number(w.currentLng) : "",
+          w.createdAt ? new Date(w.createdAt).toLocaleString("en-IN") : "",
+          w.lastLocationAt
+            ? new Date(w.lastLocationAt).toLocaleString("en-IN")
+            : "",
+        ];
+      });
+
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, 19);
+
+      if (format === "xls") {
+        const xml = generateExcelXml(headers, rows);
+        const blob = new Blob([xml], {
+          type: "application/vnd.ms-excel;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `workforce-data-${timestamp}.xls`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success(
+          `Successfully exported ${workersToExport.length} worker(s) to Excel (.xls)`
+        );
+      } else {
+        const escapeCsvCell = (val: any): string => {
+          if (val === null || val === undefined) return '""';
+          const str = String(val);
+          return `"${str.replace(/"/g, '""')}"`;
+        };
+        const csvContent =
+          "\uFEFF" +
+          [
+            headers.map(escapeCsvCell).join(","),
+            ...rows.map((r) => r.map(escapeCsvCell).join(",")),
+          ].join("\r\n");
+
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `workforce-data-${timestamp}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success(
+          `Successfully exported ${workersToExport.length} worker(s) to CSV`
+        );
+      }
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to export workforce data"
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const hasFilters =
     search ||
     workStatus !== "all" ||
@@ -154,7 +514,85 @@ function WorkforcePage() {
     <div>
       <PageHeader
         title="Workforce"
-        description={total ? `${total.toLocaleString("en-IN")} registered workforce members` : "Loading…"}
+        description={
+          total
+            ? `${total.toLocaleString("en-IN")} registered workforce members`
+            : "Loading…"
+        }
+        actions={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isExporting || total === 0}
+                className="h-9 gap-1.5 text-xs font-semibold shadow-xs"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Download className="h-3.5 w-3.5" />
+                )}
+                Export CSV / XLSX
+                <ChevronDown className="h-3 w-3 opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="text-xs">
+                Export Options
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => handleExport("csv", "all")}
+                className="cursor-pointer"
+              >
+                <Download className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                Export All Filtered (CSV)
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleExport("xls", "all")}
+                className="cursor-pointer"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 mr-2 text-emerald-600" />
+                Export All Filtered (Excel .xls)
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {selectedIds.size > 0 && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => handleExport("csv", "selected")}
+                    className="cursor-pointer font-medium text-primary"
+                  >
+                    <CheckCircle className="h-3.5 w-3.5 mr-2" />
+                    Export Selected (
+                    {selectAllFiltered
+                      ? total.toLocaleString("en-IN")
+                      : selectedIds.size}
+                    ) (CSV)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleExport("xls", "selected")}
+                    className="cursor-pointer font-medium text-primary"
+                  >
+                    <FileSpreadsheet className="h-3.5 w-3.5 mr-2 text-emerald-600" />
+                    Export Selected (
+                    {selectAllFiltered
+                      ? total.toLocaleString("en-IN")
+                      : selectedIds.size}
+                    ) (Excel)
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem
+                onClick={() => handleExport("csv", "page")}
+                className="cursor-pointer"
+              >
+                <Download className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                Export Current Page ({data?.data?.length || 0})
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
       />
       <div className="space-y-4 p-6">
         {/* Filter Bar */}
@@ -210,19 +648,35 @@ function WorkforcePage() {
                 <X className="h-3.5 w-3.5 mr-1" /> Clear
               </Button>
             )}
-            {hasFilters && total > 0 && (
+            <div className="ml-auto flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setSelectAllFiltered(true);
-                  setIsBulkDeleteOpen(true);
-                }}
-                className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs ml-auto"
+                onClick={() => handleExport("csv", "all")}
+                disabled={isExporting || total === 0}
+                className="h-9 gap-1.5 text-xs font-semibold"
               >
-                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete All Filtered ({total.toLocaleString("en-IN")})
+                {isExporting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Download className="h-3.5 w-3.5" />
+                )}
+                Export CSV / XLSX
               </Button>
-            )}
+              {hasFilters && total > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectAllFiltered(true);
+                    setIsBulkDeleteOpen(true);
+                  }}
+                  className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs"
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete All Filtered ({total.toLocaleString("en-IN")})
+                </Button>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -259,6 +713,24 @@ function WorkforcePage() {
                 )}
               </div>
               <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 font-medium border-red-300 dark:border-red-800 text-red-900 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/40"
+                  onClick={() => handleExport("csv", "selected")}
+                  disabled={isExporting}
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Download className="h-3.5 w-3.5" />
+                  )}
+                  Export Selected (
+                  {selectAllFiltered
+                    ? total.toLocaleString("en-IN")
+                    : selectedIds.size}
+                  )
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
