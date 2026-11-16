@@ -241,6 +241,55 @@ export interface BookingDetail extends BookingListItem {
   truckAssignment?: any;
 }
 
+export interface MatchedOnboardedDriver {
+  driverId: string;
+  userId: string;
+  name: string;
+  phone: string;
+  email?: string | null;
+  profileImageUrl?: string | null;
+  rating: number;
+  totalTrips: number;
+  status: 'AVAILABLE' | 'OFFLINE' | 'ON_TRIP' | 'BREAK';
+  isDocVerified: boolean;
+  dlNumber?: string | null;
+  rtoCode?: string;
+  locationName: string;
+  locationSource: 'LIVE_GPS' | 'RTO_REGISTRATION' | 'STATE_CAPITAL';
+  lat?: number | null;
+  lng?: number | null;
+  distanceKm: number | null;
+  tier: 'LOCAL' | 'NEARBY' | 'REGIONAL' | 'EXTENDED';
+  isVehicleMatch: boolean;
+  matchScore: number;
+  matchBadges: string[];
+  isCurrentlyAssigned: boolean;
+  vehicle?: {
+    id: string;
+    registrationNo: string;
+    type: string;
+    model?: string | null;
+    capacityKg?: number | null;
+    year?: number | null;
+    color?: string | null;
+    rcVerifStatus?: string;
+  } | null;
+}
+
+export interface MatchedDriversResponse {
+  booking: {
+    id: string;
+    bookingNumber: string;
+    pickupAddress: string;
+    vehicleType: string;
+    goodsType?: string;
+    status: string;
+    assignedDriverId?: string | null;
+  };
+  totalMatched: number;
+  drivers: MatchedOnboardedDriver[];
+}
+
 // ── Users ─────────────────────────────────────────────────────────────────────
 export interface UserListItem {
   id: string;

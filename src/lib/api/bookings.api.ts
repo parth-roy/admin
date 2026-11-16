@@ -56,6 +56,17 @@ export const bookingsApi = {
     return res.data.data;
   },
 
+  getMatchedDrivers: async (
+    bookingId: string,
+    params?: { radiusKm?: string; search?: string; status?: string; vehicleType?: string }
+  ): Promise<any> => {
+    const res = await apiClient.get<ApiResponse<any>>(
+      `/admin/bookings/${bookingId}/matched-drivers`,
+      { params }
+    );
+    return res.data.data;
+  },
+
   exportCsv: (): string => {
     const token = localStorage.getItem("parther_admin_access_token");
     return `${API_BASE_URL}/admin/bookings/export?token=${token}`;

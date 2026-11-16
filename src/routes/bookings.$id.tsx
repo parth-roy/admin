@@ -24,6 +24,7 @@ import { useBooking, useCancelBooking, useRefundBooking } from "@/hooks/useBooki
 import { useUnreadBookings } from "@/hooks/useUnreadBookings";
 import { BookingRouteMap } from "@/components/BookingRouteMap";
 import { AgentDriverModal } from "@/components/admin/AgentDriverModal";
+import { MatchDriversModal } from "@/components/MatchDriversModal";
 import type { BookingStop } from "@/lib/api/types";
 
 export const Route = createFileRoute("/bookings/$id")({
@@ -54,6 +55,7 @@ function BookingDetail() {
   const [refundNote, setRefundNote] = useState("");
   const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
   const [agentModalOpen, setAgentModalOpen] = useState(false);
+  const [matchDriversOpen, setMatchDriversOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -211,6 +213,14 @@ function BookingDetail() {
               <Link to="/bookings">
                 <ArrowLeft className="h-4 w-4 mr-1.5" /> Back to All Bookings
               </Link>
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="h-9 gap-1.5 bg-primary text-primary-foreground font-semibold shadow-xs hover:bg-primary/90"
+              onClick={() => setMatchDriversOpen(true)}
+            >
+              <UserCheck className="h-4 w-4" /> Match Available Drivers
             </Button>
             <Button
               variant="outline"
@@ -848,6 +858,14 @@ function BookingDetail() {
                   <Button asChild variant="outline" size="sm" className="w-full text-xs">
                     <Link to="/drivers">View Driver Profile</Link>
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5"
+                    onClick={() => setMatchDriversOpen(true)}
+                  >
+                    <UserCheck className="h-3.5 w-3.5 text-primary" /> Reassign / Match Another Driver
+                  </Button>
                 </>
               ) : b.hasAgentDriver && b.agentDriverDetails ? (
                 <div className="space-y-2">
@@ -872,13 +890,28 @@ function BookingDetail() {
                   >
                     View Agent Driver Dossier
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5"
+                    onClick={() => setMatchDriversOpen(true)}
+                  >
+                    <UserCheck className="h-3.5 w-3.5 text-primary" /> Match Direct Onboarded Driver
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded px-2.5 py-1.5 text-xs font-medium">
                     No driver assigned yet
                   </p>
-                  <Button asChild size="sm" className="w-full text-xs">
+                  <Button
+                    size="sm"
+                    className="w-full text-xs font-semibold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
+                    onClick={() => setMatchDriversOpen(true)}
+                  >
+                    <UserCheck className="h-3.5 w-3.5" /> Find & Match Onboarded Drivers
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="w-full text-xs">
                     <Link to="/dispatch">Go to Dispatch Queue</Link>
                   </Button>
                 </div>
@@ -994,6 +1027,18 @@ function BookingDetail() {
           onAssigned={() => refetch()}
         />
       )}
+
+      {/* ── Match Onboarded Drivers Modal ── */}
+      <MatchDriversModal
+        open={matchDriversOpen}
+        onOpenChange={setMatchDriversOpen}
+        bookingId={id}
+        bookingNumber={b.bookingNumber}
+        pickupAddress={b.pickupAddress}
+        vehicleType={b.vehicleType}
+        assignedDriverId={b.driver?.id || b.driverId}
+        onAssignedSuccess={() => refetch()}
+      />
     </div>
   );
 }
