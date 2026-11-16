@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -184,11 +184,37 @@ export function AppSidebar() {
   const { admin, logout } = useAuth();
   const { mode, setMode, config } = useAdminWorkspace();
 
+  // Flat list of all registered menu URLs across all sections (including subItems)
+  const allMenuUrls = useMemo(() => {
+    const urls: string[] = [];
+    sections.forEach((sec) => {
+      sec.items.forEach((it) => {
+        urls.push(it.url);
+        if (it.subItems) {
+          it.subItems.forEach((sub) => urls.push(sub.url));
+        }
+      });
+    });
+    return urls;
+  }, []);
+
   const isActive = (url: string) => {
     if (url === "/") return pathname === "/";
-    // Exact-prefix but must be followed by end-of-string or "/" to avoid
-    // /workforce matching /workforce/verification
-    return pathname === url || pathname.startsWith(url + "/");
+    if (pathname === url) return true;
+
+    // Sub-path match: check if pathname starts with `url + "/"`
+    // BUT only if there isn't another more specific registered menu URL that matches
+    if (pathname.startsWith(url + "/")) {
+      const hasMoreSpecificMatch = allMenuUrls.some(
+        (otherUrl) =>
+          otherUrl !== url &&
+          otherUrl.startsWith(url + "/") &&
+          (pathname === otherUrl || pathname.startsWith(otherUrl + "/"))
+      );
+      return !hasMoreSpecificMatch;
+    }
+
+    return false;
   };
 
   const isSubItemActive = (subUrl: string) => {
@@ -197,9 +223,7 @@ export function AppSidebar() {
     return cleanPath === cleanSub;
   };
 
-  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
-    "Transport Agents": true,
-  });
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     sections.forEach((sec) => {
