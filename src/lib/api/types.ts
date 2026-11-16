@@ -161,18 +161,84 @@ export interface BookingStop {
   id: string;
   sequence: number;
   address: string;
-  lat: number | null;
-  lng: number | null;
+  lat?: number | null;
+  lng?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  receiverName?: string | null;
+  receiverPhone?: string | null;
+  isCompleted?: boolean;
+  podPhotoUrl?: string | null;
+  podVerifiedAt?: string | null;
 }
 
 export interface BookingDetail extends BookingListItem {
   stops: BookingStop[];
+  pickupLat?: number;
+  pickupLng?: number;
+  pickupAddress: string;
   cancellationReason: string | null;
   cancelledBy: string | null;
+  cancellationTime?: string | null;
   earning: DriverEarning | null;
+  fleetEarning?: any;
   pricingAuditLog?: any[];
   grandTotal?: number;
   gstAmount?: number;
+  taxAmount?: number;
+  baseFare?: number;
+  distanceFare?: number;
+  timeFare?: number;
+  fuelSurcharge?: number;
+  loadingCharge?: number;
+  laborCharge?: number;
+  hasLoadingService?: boolean;
+  laborRequired?: boolean;
+  laborersCount?: number | null;
+  laborType?: string | null;
+  tollCharge?: number;
+  waitingCharge?: number;
+  discountAmount?: number;
+  coinsRedeemed?: number;
+  surgeMultiplier?: number;
+  estimatedDistance?: number;
+  estimatedDuration?: number;
+  estimatedPickupEta?: number;
+  etaMinutes?: number;
+  actualPickupTime?: string | null;
+  actualDeliveryTime?: string | null;
+  paymentMethod?: string | null;
+  paymentRef?: string | null;
+  razorpayOrderId?: string | null;
+  pickupOtp?: string | null;
+  goodsType?: string;
+  goodsDescription?: string | null;
+  goodsWeightKg?: number | null;
+  goodsQuantity?: number;
+  goodsLengthCm?: number | null;
+  goodsWidthCm?: number | null;
+  goodsHeightCm?: number | null;
+  declaredGoodsValue?: number | null;
+  handlingInstructions?: string | null;
+  containsRestrictedGoods?: boolean;
+  goodsImageUrls?: string[];
+  receiverName?: string | null;
+  receiverPhone?: string | null;
+  gstin?: string | null;
+  gstBusinessName?: string | null;
+  customerNote?: string | null;
+  customerRating?: number | null;
+  driverRating?: number | null;
+  invoiceUrl?: string | null;
+  locationHistory?: Array<{ latitude: number; longitude: number; recordedAt: string }>;
+  driver?: {
+    id?: string;
+    currentLat?: number | null;
+    currentLng?: number | null;
+    user?: { id?: string; name: string | null; phone: string; email?: string | null; profileImageUrl?: string | null };
+    vehicle?: { id?: string; registrationNo: string; type: string; model?: string | null } | null;
+  } | null;
+  truckAssignment?: any;
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────
