@@ -1,7 +1,12 @@
 import apiClient from './client';
-import type { ApiResponse, Paginated, DriverListItem, DriverDetail, DriverDocument, VerificationLog, DriversParams } from './types';
+import type { ApiResponse, Paginated, DriverListItem, DriverDetail, DriverDocument, VerificationLog, DriversParams, DriverStatsSummary } from './types';
 
 export const driversApi = {
+  getStats: async (): Promise<DriverStatsSummary> => {
+    const res = await apiClient.get<ApiResponse<DriverStatsSummary>>('/admin/drivers/stats');
+    return res.data.data;
+  },
+
   getPendingCount: async (): Promise<{ count: number; driverCount?: number; leadCount?: number }> => {
     const res = await apiClient.get<ApiResponse<{ count: number; driverCount?: number; leadCount?: number }>>('/admin/driver-documents/pending-count');
     return res.data.data;

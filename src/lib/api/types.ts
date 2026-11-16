@@ -334,6 +334,8 @@ export interface DriverVehicle {
   registrationNo: string;
   type: VehicleType | string;
   rcVerifStatus: UlipVerifStatus | string;
+  make?: string;
+  model?: string;
 }
 
 export interface DriverListItem {
@@ -347,7 +349,8 @@ export interface DriverListItem {
   totalTrips: number;
   createdAt: string;
   user: { id: string; name: string | null; phone: string; email: string | null; isActive: boolean };
-  vehicle?: { id: string; registrationNo: string; type: string; rcVerifStatus: string } | null;
+  vehicle?: { id: string; registrationNo: string; type: string; rcVerifStatus: string; make?: string; model?: string } | null;
+  fleetOwner?: { id: string; companyName: string; user?: { name: string; phone: string } } | null;
   subscription: DriverSubscription | null;
   documents: DriverDocument[];
   complianceScore?: number;
@@ -521,6 +524,18 @@ export interface UsersParams extends PaginationParams {
   search?: string;
 }
 
+export interface DriverStatsSummary {
+  total: number;
+  totalDrivers: number;
+  totalLeads: number;
+  available: number;
+  onTrip: number;
+  offline: number;
+  docsPending: number;
+  docsVerified: number;
+  blocked: number;
+}
+
 export interface DriversParams extends PaginationParams {
   status?: DriverStatus;
   dlVerifStatus?: UlipVerifStatus;
@@ -528,6 +543,12 @@ export interface DriversParams extends PaginationParams {
   isDocVerified?: boolean;
   plan?: SubscriptionPlan;
   search?: string;
+  vehicleType?: string;
+  source?: 'ALL' | 'ONBOARDED' | 'LEADS';
+  accountStatus?: 'ALL' | 'ACTIVE' | 'BLOCKED';
+  state?: string;
+  tripsFilter?: 'ALL' | 'HAS_TRIPS' | 'ZERO_TRIPS';
+  sortBy?: string;
 }
 
 export interface FleetParams extends PaginationParams {

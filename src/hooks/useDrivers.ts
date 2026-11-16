@@ -36,6 +36,15 @@ export function useDriverVerifLogs(id: string) {
   });
 }
 
+export function useDriverStats() {
+  return useQuery({
+    queryKey: ['drivers', 'stats'],
+    queryFn: () => driversApi.getStats(),
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+  });
+}
+
 export function usePendingDriverVerificationCount() {
   return useQuery({
     queryKey: ['pendingDriverDocumentsCount'],
