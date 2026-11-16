@@ -392,9 +392,52 @@ export interface VerificationLog {
 }
 
 export interface DriverDetail extends DriverListItem {
+  dlNumber?: string | null;
+  dob?: string | null;
+  permitTypes?: string | null;
+  dlVerifiedAt?: string | null;
+  dlUlipRawResponse?: any;
+  bankAccountNo?: string | null;
+  bankIfsc?: string | null;
+  bankName?: string | null;
+  bankAccountHolderName?: string | null;
+  bankVerified?: boolean;
+  user: {
+    id: string;
+    name: string | null;
+    phone: string;
+    email: string | null;
+    isActive: boolean;
+    profileImageUrl?: string | null;
+    wallet?: { cachedBalance: number } | null;
+    coinBalance?: { balance: number } | null;
+  };
+  vehicle?: {
+    id: string;
+    registrationNo: string;
+    type: string;
+    make?: string;
+    model?: string;
+    year?: number;
+    color?: string | null;
+    capacityKg?: number;
+    ownerName?: string | null;
+    chassisNumber?: string | null;
+    engineNumber?: string | null;
+    rcVerifStatus: string;
+    rcVerifiedAt?: string | null;
+  } | null;
   documents: DriverDocument[];
   earnings: DriverEarning[];
   verificationLogs: VerificationLog[];
+  bookings?: Array<{
+    id: string;
+    bookingNumber: string;
+    status: string;
+    totalFare: number;
+    pickupAddress: string;
+    createdAt: string;
+  }>;
 }
 
 // ── Fleet ─────────────────────────────────────────────────────────────────────

@@ -5,7 +5,7 @@ import {
   Ban, CheckCircle, Trash2, ArrowDownUp, X, Filter,
   Truck, ShieldCheck, ShieldAlert, Copy, RefreshCw,
   MapPin, Building2, Phone, CheckCircle2, AlertCircle,
-  ExternalLink, Sparkles, ArrowUpDown, Clock
+  ExternalLink, Sparkles, ArrowUpDown, Clock, Eye
 } from "lucide-react";
 import { PageHeader } from "@/components/admin/AdminTopbar";
 import { Button } from "@/components/ui/button";
@@ -26,13 +26,14 @@ import {
 } from "@/hooks/useDrivers";
 import { DeleteConfirmDialog } from "@/components/admin/DeleteConfirmDialog";
 import { BulkDeleteConfirmDialog } from "@/components/admin/BulkDeleteConfirmDialog";
+import { DriverDetailModal } from "@/components/admin/DriverDetailModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { DriverStatus, UlipVerifStatus, DriverListItem } from "@/lib/api/types";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/drivers")({
-  head: () => ({ meta: [{ title: "Drivers Directory & Management — SUPER ADMIN" }] }),
+  head: () => ({ meta: [{ title: "Onboarded Drivers Directory — SUPER ADMIN" }] }),
   component: DriversPage,
 });
 
@@ -113,7 +114,6 @@ function DriversPage() {
   const [limit, setLimit] = useState(25);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
-  const [source, setSource] = useState("all"); // 'all' | 'ONBOARDED' | 'LEADS'
   const [vehicleType, setVehicleType] = useState("all");
   const [stateFilter, setStateFilter] = useState("all");
   const [dlVerif, setDlVerif] = useState("all");
@@ -123,6 +123,9 @@ function DriversPage() {
   const [tripsFilter, setTripsFilter] = useState("all"); // 'all' | 'HAS_TRIPS' | 'ZERO_TRIPS'
   const [sortBy, setSortBy] = useState("createdAt_desc");
 
+  // Selected Driver for Details Dossier Modal
+  const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
+
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DriverListItem | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -130,7 +133,7 @@ function DriversPage() {
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const debouncedSearch = useDebounce(search, 350);
 
-  // Fetch KPI Stats
+  // Fetch KPI Stats for Onboarded Drivers Only
   const { data: stats, isLoading: isStatsLoading, refetch: refetchStats } = useDriverStats();
 
   // Fetch Drivers with full filters
@@ -139,7 +142,6 @@ function DriversPage() {
     limit,
     search: debouncedSearch || undefined,
     status: status !== "all" ? (status as DriverStatus) : undefined,
-    source: source !== "all" ? (source as any) : undefined,
     vehicleType: vehicleType !== "all" ? vehicleType : undefined,
     state: stateFilter !== "all" ? stateFilter : undefined,
     dlVerifStatus: dlVerif !== "all" ? (dlVerif as UlipVerifStatus) : undefined,
@@ -190,7 +192,6 @@ function DriversPage() {
   const resetFilters = () => {
     setSearch("");
     setStatus("all");
-    setSource("all");
     setVehicleType("all");
     setStateFilter("all");
     setDlVerif("all");
@@ -207,7 +208,6 @@ function DriversPage() {
   const hasFilters =
     Boolean(search) ||
     status !== "all" ||
-    source !== "all" ||
     vehicleType !== "all" ||
     stateFilter !== "all" ||
     dlVerif !== "all" ||
@@ -224,7 +224,6 @@ function DriversPage() {
         payload.selectAllFiltered = true;
         payload.filter = {
           status: status !== "all" ? status : undefined,
-          source: source !== "all" ? source : undefined,
           vehicleType: vehicleType !== "all" ? vehicleType : undefined,
           state: stateFilter !== "all" ? stateFilter : undefined,
           dlVerifStatus: dlVerif !== "all" ? dlVerif : undefined,
@@ -257,7 +256,7 @@ function DriversPage() {
     <div>
       <PageHeader
         title="Drivers Directory"
-        description="Comprehensive fleet management, real-time tracking status, ULIP compliance, and multi-state vehicle registry."
+        description="Comprehensive fleet directory of verified & onboarded commercial drivers, vehicle assignments, and real-time status."
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -282,7 +281,7 @@ function DriversPage() {
       />
 
       <div className="space-y-4 p-6">
-        {/* ── KPI Summary Cards with 1-Click Filter Activation ── */}
+        {/* ── KPI Summary Cards (Onboarded Fleet Only) ── */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Card
             onClick={resetFilters}
@@ -291,14 +290,14 @@ function DriversPage() {
             }`}
           >
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-              <span>Total Fleet</span>
+              <span>Total Onboarded</span>
               <Truck className="h-3.5 w-3.5 text-primary" />
             </div>
             <div className="mt-1.5 text-xl font-bold tracking-tight">
-              {stats?.total != null ? stats.total.toLocaleString("en-IN") : isStatsLoading ? "—" : total.toLocaleString("en-IN")}
+              {stats?.totalDrivers != null ? stats.totalDrivers.toLocaleString("en-IN") : isStatsLoading ? "—" : total.toLocaleString("en-IN")}
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground flex items-center justify-between">
-              <span>{stats?.totalDrivers ?? "—"} Onboarded</span>
+              <span>{stats?.docsVerified ?? 0} Verified</span>
               <span className="text-primary font-semibold">View All</span>
             </div>
           </Card>
@@ -403,16 +402,16 @@ function DriversPage() {
           </Card>
         </div>
 
-        {/* ── Robust Multi-Facet Filter Console ── */}
+        {/* ── Multi-Facet Filter Console ── */}
         <Card className="p-4 space-y-3 shadow-xs border">
           {/* Row 1: Search & Primary Filters */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
             {/* Search Input */}
-            <div className="relative md:col-span-5">
+            <div className="relative md:col-span-6">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 className="pl-9 pr-8 h-9 text-xs"
-                placeholder="Search by driver name, phone, DL, or vehicle no (e.g. KL14, DL01, MH12)…"
+                placeholder="Search onboarded driver name, phone, DL, or vehicle no (e.g. KL14, PB10, MH12)…"
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -429,28 +428,8 @@ function DriversPage() {
               )}
             </div>
 
-            {/* Driver Source */}
-            <div className="md:col-span-2">
-              <Select
-                value={source}
-                onValueChange={(v) => {
-                  setSource(v);
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue placeholder="All Sources" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sources</SelectItem>
-                  <SelectItem value="ONBOARDED">App Onboarded Only</SelectItem>
-                  <SelectItem value="LEADS">Website Leads Only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Operational Status */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               <Select
                 value={status}
                 onValueChange={(v) => {
@@ -661,13 +640,6 @@ function DriversPage() {
                 </Badge>
               )}
 
-              {source !== "all" && (
-                <Badge variant="secondary" className="gap-1 h-6 font-normal">
-                  Source: {source === "ONBOARDED" ? "App Onboarded" : "Website Leads"}
-                  <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => setSource("all")} />
-                </Badge>
-              )}
-
               {status !== "all" && (
                 <Badge variant="secondary" className="gap-1 h-6 font-normal">
                   Status: {status}
@@ -741,7 +713,7 @@ function DriversPage() {
               </Button>
 
               <span className="ml-auto text-[11px] text-muted-foreground font-medium">
-                Found <strong>{total.toLocaleString("en-IN")}</strong> matching drivers
+                Showing <strong>{total.toLocaleString("en-IN")}</strong> onboarded drivers
               </span>
             </div>
           )}
@@ -826,11 +798,11 @@ function DriversPage() {
                   <TableHead className="min-w-[180px]">Vehicle & RC</TableHead>
                   <TableHead className="min-w-[140px]">License (DL)</TableHead>
                   <TableHead className="min-w-[130px]">Op. Status</TableHead>
-                  <TableHead className="min-w-[100px]">Docs KYC</TableHead>
+                  <TableHead className="min-w-[130px]">Docs KYC</TableHead>
                   <TableHead className="min-w-[90px]">Account</TableHead>
                   <TableHead className="min-w-[110px]">Trips & Rating</TableHead>
                   <TableHead className="min-w-[110px]">Registered</TableHead>
-                  <TableHead className="text-right min-w-[130px]">Actions</TableHead>
+                  <TableHead className="text-right min-w-[160px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -848,7 +820,6 @@ function DriversPage() {
                   data.data.map((d: DriverListItem) => {
                     const rtoInfo = getRtoInfo(d.vehicle?.registrationNo);
                     const driverName = d.user?.name || "Driver Partner";
-                    const isLead = d.source === "WEBSITE";
                     const cleanPhone = (d.user?.phone || "").replace(/\D/g, "").slice(-10);
 
                     return (
@@ -862,25 +833,20 @@ function DriversPage() {
                           />
                         </TableCell>
 
-                        {/* Driver Profile */}
+                        {/* Driver Profile (Click opens full driver details dossier) */}
                         <TableCell>
                           <div className="space-y-1">
                             <div className="flex items-center gap-1.5">
-                              <Link
-                                to="/verification"
-                                className="font-semibold text-sm hover:underline text-foreground tracking-tight"
+                              <button
+                                type="button"
+                                onClick={() => setSelectedDriverId(d.id)}
+                                className="font-semibold text-sm hover:underline hover:text-primary text-foreground text-left tracking-tight cursor-pointer"
                               >
                                 {driverName}
-                              </Link>
-                              {isLead ? (
-                                <Badge variant="outline" className="text-[10px] h-4 px-1 border-purple-400 text-purple-700 bg-purple-50 dark:bg-purple-950/40 font-medium">
-                                  Lead
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-[10px] h-4 px-1 border-emerald-400 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 font-medium">
-                                  App
-                                </Badge>
-                              )}
+                              </button>
+                              <Badge variant="outline" className="text-[10px] h-4 px-1 border-emerald-400 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 font-medium">
+                                Onboarded
+                              </Badge>
                             </div>
 
                             {/* Fleet Owner tag if attached */}
@@ -888,13 +854,6 @@ function DriversPage() {
                               <div className="flex items-center gap-1 text-[11px] text-blue-700 dark:text-blue-300">
                                 <Building2 className="h-3 w-3" />
                                 <span className="font-medium truncate max-w-[130px]">{d.fleetOwner.companyName}</span>
-                              </div>
-                            )}
-
-                            {d.websiteLeadDetails?.city && (
-                              <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-                                <MapPin className="h-3 w-3" />
-                                {d.websiteLeadDetails.city}
                               </div>
                             )}
                           </div>
@@ -1026,22 +985,38 @@ function DriversPage() {
                           </Select>
                         </TableCell>
 
-                        {/* Docs KYC */}
+                        {/* Docs KYC with dedicated button for unverified drivers */}
                         <TableCell>
-                          {d.isDocVerified ? (
-                            <Badge variant="outline" className="text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-[11px] font-semibold gap-1">
-                              <CheckCircle2 className="h-3 w-3" /> Verified
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-amber-700 bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-[11px] font-semibold gap-1">
-                              <AlertCircle className="h-3 w-3" /> Pending
-                            </Badge>
-                          )}
-                          {typeof d.complianceScore === "number" && (
-                            <div className="text-[10px] text-muted-foreground mt-0.5">
-                              Score: {d.complianceScore}%
-                            </div>
-                          )}
+                          <div className="space-y-1">
+                            {d.isDocVerified ? (
+                              <Badge variant="outline" className="text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-[11px] font-semibold gap-1">
+                                <CheckCircle2 className="h-3 w-3" /> Verified
+                              </Badge>
+                            ) : (
+                              <div className="space-y-1">
+                                <Badge variant="outline" className="text-amber-700 bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-[11px] font-semibold gap-1">
+                                  <AlertCircle className="h-3 w-3" /> Pending
+                                </Badge>
+                                <div>
+                                  <Button
+                                    asChild
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-6 px-1.5 text-[10px] gap-1 font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-300 dark:border-amber-800 shadow-2xs"
+                                  >
+                                    <Link to="/verification">
+                                      <ShieldAlert className="h-3 w-3 text-amber-600" /> Verify KYC <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                                    </Link>
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                            {typeof d.complianceScore === "number" && (
+                              <div className="text-[10px] text-muted-foreground">
+                                Score: {d.complianceScore}%
+                              </div>
+                            )}
+                          </div>
                         </TableCell>
 
                         {/* Account Status */}
@@ -1079,6 +1054,16 @@ function DriversPage() {
                         {/* Actions */}
                         <TableCell className="text-right">
                           <div className="flex items-center gap-1 justify-end">
+                            {/* Inspect / View Profile Button */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs px-2 gap-1 font-medium hover:bg-primary/10 hover:text-primary shadow-2xs"
+                              onClick={() => setSelectedDriverId(d.id)}
+                            >
+                              <Eye className="h-3.5 w-3.5 text-primary" /> View
+                            </Button>
+
                             {/* Block/Unblock Button */}
                             <Button
                               size="sm"
@@ -1132,7 +1117,7 @@ function DriversPage() {
                     <TableCell colSpan={12} className="py-16 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <Truck className="h-10 w-10 text-muted-foreground/40" />
-                        <p className="text-sm font-semibold text-foreground">No drivers match your current filters</p>
+                        <p className="text-sm font-semibold text-foreground">No onboarded drivers match your current filters</p>
                         <p className="text-xs text-muted-foreground max-w-sm">
                           Try adjusting search terms, widening region/RTO, or clearing selected status filters.
                         </p>
@@ -1204,6 +1189,17 @@ function DriversPage() {
           </div>
         </Card>
       </div>
+
+      {/* Driver Detail Modal / Dossier */}
+      <DriverDetailModal
+        driverId={selectedDriverId}
+        open={!!selectedDriverId}
+        onOpenChange={(isOpen) => !isOpen && setSelectedDriverId(null)}
+        onRefreshList={() => {
+          refetch();
+          refetchStats();
+        }}
+      />
 
       {/* Delete Confirmation Dialog */}
       {deleteTarget && (
